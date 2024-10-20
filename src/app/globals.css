@@ -17,11 +17,41 @@
 }
 
 body {
+  overflow: hidden;
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
+  background: linear-gradient(to bottom,
       transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+      rgb(var(--background-end-rgb))) rgb(var(--background-start-rgb));
+
+}
+
+
+#wheel {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  min-width: 3000px;
+
+  canvas {
+    min-width: 3000px;
+    border: solid 1px white;
+    width: 100vw !important;
+    height: 200vh !important;
+    position: relative;
+    transform: translateY(25%);
+  }
+}
+
+#peg {
+  position: absolute;
+  top: 0px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+  width: 0;
+  height: 0;
+  border-left: 25px solid transparent;
+  border-right: 25px solid transparent;
+  border-top: 50px solid red;
 }
