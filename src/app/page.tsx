@@ -1,4 +1,5 @@
 import Wheel from '../components/Wheel'
+import UI from '../components/UI'
 import { initializeApp } from 'firebase/app'
 import { getFirestore, collection, getDocs } from 'firebase/firestore'
 // import { snackbar } from 'mdui/functions/snackbar.js'
@@ -14,14 +15,22 @@ const db = getFirestore(
   })
 )
 
-async function getmovies() {
+async function getMovies() {
   const moviesCol = collection(db, 'movies')
   const movieSnapshot = await getDocs(moviesCol)
-  const movieList = movieSnapshot.docs.map((doc) => doc.data())
+  const movieList = movieSnapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }))
   return movieList
 }
 
 export default async function Home() {
-  const movies = await getmovies()
-  return <Wheel movies={movies} />
+  const movies = await getMovies()
+  return (
+    <>
+      <Wheel movies={movies} />
+      <UI movies={movies}></UI>
+    </>
+  )
 }
