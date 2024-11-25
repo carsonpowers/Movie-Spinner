@@ -55,3 +55,34 @@ body {
   border-right: 25px solid transparent;
   border-top: 50px solid red;
 }
+
+.autocomplete {
+  padding: .5rem;
+  background: white;
+  border-bottom-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+  color: black;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  margin-top: -.75rem;
+
+  >* {
+    border-radius: 1rem;
+    padding: 0.5rem;
+  }
+
+  >.selected {
+    text-align: left;
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+}
+
+#movie-input {
+  transition: padding-bottom 0.5s;
+
+  &:focus,
+  active {
+    padding-bottom: 1rem;
+  }
+
+}

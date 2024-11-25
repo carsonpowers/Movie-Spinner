@@ -7,9 +7,17 @@ import {
   addDoc,
   doc,
   deleteDoc,
+  setDoc,
 } from 'firebase/firestore'
 import autocompleter from 'autocompleter'
 import { useEffect, useRef } from 'react'
+import { init } from 'next/dist/compiled/webpack/webpack'
+
+interface Movie {
+  Title: string
+  imdbID: string
+  Year: string
+}
 
 const db = getFirestore(
   initializeApp({
@@ -22,22 +30,31 @@ const db = getFirestore(
   })
 )
 
-const fetchMovieData = async ({ Title }) =>
-  (
-    await fetch(`http://www.omdbapi.com/?apikey=44648a33&s=${Title}&type=movie`)
-  ).json()
+const fetchMovieData = async ({ Title }: { Title: string }) => {
+  try {
+    const response = await fetch(
+      `http://www.omdbapi.com/?apikey=44648a33&s=${Title}&type=movie`
+    )
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    const data = await response.json()
+    return data
+  } catch (error) {
+    console.error('Error fetching movie data:', error)
+    return null // or handle the error as needed
+  }
+}
 
-async function addMovie(movie: any) {
-  const moviesCol = collection(db, 'movies')
-  const thing = await addDoc(moviesCol, movie)
-  console.log('thing', thing)
+const addMovie = async (movie: any, docId: string) => {
+  await setDoc(doc(db, 'movies', docId), movie)
 }
 
 const removeMovie = async ({ target }: { target: HTMLElement }) => {
   const id = target.closest('li')?.dataset?.id
   if (!id) throw new Error("Couldn't find movie id")
   console.log('deleting', id)
-  //   await deleteDoc(doc(db, 'movies', id))
+  await deleteDoc(doc(db, 'movies', id))
 }
 
 const RemoveButton = ({ Title }) => (
@@ -75,39 +92,55 @@ const ListItem = ({
   </li>
 )
 
+const initAutoCompleter = (input: HTMLInputElement) => {
+  autocompleter({
+    input,
+    showOnFocus: true,
+    fetch: async (text, update) => {
+      console.log('fetch')
+      const movieData = (await fetchMovieData({ Title: text })).Search?.map?.(
+        ({ Title: label, imdbID, Year }: Movie) => ({
+          label,
+          value: label,
+          imdbID,
+          Year,
+        })
+      ) || [{ label: 'No results found' }]
+      console.log('movieData', movieData)
+      update(movieData)
+    },
+    onSelect: ({ label: Title = '', Year, imdbID }) => {
+      input.value = Title
+      input.blur()
+      console.log('selected', { Title, Year: Year }, imdbID)
+      addMovie({ Title, Year }, imdbID)
+    },
+  })
+}
+
 const AddListItem = () => {
   const inputRef = useRef(null)
 
   useEffect(() => {
-    if (inputRef.current) {
-      autocompleter({
-        input: inputRef.current,
-        fetch: async (text, update) => {
-          const data = await fetchMovieData({ Title: text, Year: '' })
-          console.log('data', data)
-
-          const suggestions = data.Search
-            ? data.Search.map((movie) => ({
-                label: movie.Title,
-                value: movie.Title,
-              }))
-            : []
-          update(suggestions)
-        },
-        onSelect: (item) => {
-          inputRef.current.value = item.label
-        },
-      })
-    }
+    const { current: input } = inputRef
+    if (input) initAutoCompleter(input)
   }, [])
 
   return (
     <ListItem>
       <input
+        style={{
+          borderTopLeftRadius: '0.5rem',
+          borderTopRightRadius: '0.5rem',
+          borderBottomLeftRadius: '0.5rem',
+          borderBottomRightRadius: '0.5rem',
+          outline: 'none',
+        }}
+        id='movie-input'
         ref={inputRef}
         type='text'
         placeholder='Add a movie...'
-        className='w-full rounded-2xl text-center text-black'
+        className='w-full text-center text-black'
       />
     </ListItem>
   )
