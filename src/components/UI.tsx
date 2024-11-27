@@ -1,23 +1,17 @@
 'use client'
 import { initializeApp } from 'firebase/app'
-import {
-  getFirestore,
-  collection,
-  getDocs,
-  addDoc,
-  doc,
-  deleteDoc,
-  setDoc,
-} from 'firebase/firestore'
+import { getFirestore, doc, deleteDoc, setDoc } from 'firebase/firestore'
 import autocompleter from 'autocompleter'
 import { useEffect, useRef } from 'react'
-import { init } from 'next/dist/compiled/webpack/webpack'
+import { useRouter } from 'next/navigation'
 
 interface Movie {
   Title: string
   imdbID: string
   Year: string
 }
+
+let _refresh
 
 const db = getFirestore(
   initializeApp({
@@ -47,22 +41,51 @@ const fetchMovieData = async ({ Title }: { Title: string }) => {
 }
 
 const addMovie = async (movie: any, docId: string) => {
+  if (!docId) return
   await setDoc(doc(db, 'movies', docId), movie)
+  _refresh()
 }
 
 const removeMovie = async ({ target }: { target: HTMLElement }) => {
-  const id = target.closest('li')?.dataset?.id
+  const Menu = target.closest('ul')
+  const LI = target.closest('li')
+  const {
+    dataset: { id },
+  } = LI || {}
+
   if (!id) throw new Error("Couldn't find movie id")
-  console.log('deleting', id)
+
   await deleteDoc(doc(db, 'movies', id))
+
+  Menu?.animate(
+    [
+      { height: `${Menu.offsetHeight}px` },
+      { height: `${Menu.offsetHeight - (LI?.offsetHeight + 8)}px` },
+    ],
+    {
+      duration: 500, // duration in milliseconds
+      easing: 'ease-out', // easing function
+      fill: 'forwards', // keep the element at the end state of the animation
+    }
+  )
+
+  LI.animate([{ opacity: 1 }, { opacity: 0 }], {
+    duration: 500, // duration in milliseconds
+    easing: 'ease-out', // easing function
+    fill: 'forwards', // keep the element at the end state of the animation
+  }).onfinish = () => {
+    LI.style = 'display:none'
+    Menu.animate([{ height: `auto` }], {
+      duration: 0, // duration in milliseconds
+      fill: 'forwards', // keep the element at the end state of the animation
+    }).onfinish = () => {
+      _refresh()
+    }
+  }
 }
 
 const RemoveButton = ({ Title }) => (
   <button
-    style={{
-      position: 'absolute',
-      right: '1rem',
-    }}
     onClick={removeMovie}
     title={`Remove ${Title}`}
     aria-label={`Remove ${Title}`}
@@ -82,13 +105,12 @@ const ListItem = ({
   key: string
 }) => (
   <li
-    style={{ position: 'relative' }}
-    className='p-2 border border-white cursor-pointer rounded-xl m-2'
+    className='relative justify-between capitalize p-2 border border-white cursor-pointer rounded-xl m-2 flex'
     key={id}
     data-id={id}
     title={Title}
   >
-    <div style={{ display: 'flex' }}>{children}</div>
+    {children}
   </li>
 )
 
@@ -97,7 +119,6 @@ const initAutoCompleter = (input: HTMLInputElement) => {
     input,
     showOnFocus: true,
     fetch: async (text, update) => {
-      console.log('fetch')
       const movieData = (await fetchMovieData({ Title: text })).Search?.map?.(
         ({ Title: label, imdbID, Year }: Movie) => ({
           label,
@@ -106,13 +127,12 @@ const initAutoCompleter = (input: HTMLInputElement) => {
           Year,
         })
       ) || [{ label: 'No results found' }]
-      console.log('movieData', movieData)
       update(movieData)
     },
-    onSelect: ({ label: Title = '', Year, imdbID }) => {
+    onSelect: ({ label: Title = '', Year, imdbID }: Movie) => {
+      if (!imdbID) return
       input.value = Title
       input.blur()
-      console.log('selected', { Title, Year: Year }, imdbID)
       addMovie({ Title, Year }, imdbID)
     },
   })
@@ -146,47 +166,36 @@ const AddListItem = () => {
   )
 }
 
-const MovieList = ({ movies }) => {
-  return (
-    <ul className='list-none p-0 m-0 border border-white rounded-2xl text-1xl absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 max-w-full'>
-      {movies.map(({ id, Title, Year }) => (
-        <ListItem key={id} id={id} Title={Title}>
-          <label
-            style={{
-              display: 'block',
-              maxWidth: 'calc(100% - 3rem)',
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              pointerEvents: 'none',
-            }}
-          >
-            {Title}
-            {` (${Year})`}
-          </label>
-          <RemoveButton Title={Title} />
-        </ListItem>
-      ))}
-      <AddListItem />
-    </ul>
-  )
-}
+const MovieList = ({ movies }: { movies: [Movie] }) => (
+  <ul
+    id='movie-list'
+    className='opacity-0 overflow-hidden list-none p-0 m-0 border border-white rounded-2xl text-1xl absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 max-w-full'
+    style={{ transition: 'opacity 0.5s' }}
+  >
+    {movies.map(({ id, Title, Year }) => (
+      <ListItem key={id} id={id} Title={Title}>
+        <label
+          style={{
+            display: 'block',
+            maxWidth: 'calc(100% - 3rem)',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            pointerEvents: 'none',
+            flex: '1',
+          }}
+        >
+          {Title}
+          {` (${Year})`}
+        </label>
+        <RemoveButton Title={Title} />
+      </ListItem>
+    ))}
+    <AddListItem />
+  </ul>
+)
 
 export default function UI({ movies }) {
-  return (
-    <>
-      <section style={{ width: '100%' }}>
-        <h2>Movies</h2>
-        <div
-          id='movie-list-container'
-          className='flex flex-wrap justify-center border border-white'
-        >
-          <MovieList movies={movies} />
-        </div>
-        <button onClick={() => addMovie({ Title: 'test1', Year: '2021' })}>
-          Add Movie
-        </button>
-      </section>
-    </>
-  )
+  _refresh = useRouter()?.refresh
+  return <MovieList movies={movies} />
 }

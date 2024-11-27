@@ -27,26 +27,36 @@ const itemConfig = {
 let wheelInstance: any
 let lockWheel: boolean | undefined
 
+const getWheelItems = async (movies: Movie[]) => {
+  const wheelItems = (
+    await Promise.all(movies.map(fetchMovieDetailsFromOmdbApi))
+  )?.map?.(toWheelItems)
+  // render images before they are passed to the canvas (in the wheel constructor)
+  await renderPosterImages(wheelItems)
+  return wheelItems
+}
+
+const renderPosterImages = (movies) =>
+  Promise.all(
+    movies
+      .filter(({ image }) => image !== undefined)
+      .map(({ image }) =>
+        toDecodeImage({ image } as { image: HTMLImageElement })
+      )
+  )
+
 const loadWheel = async (
   { current }: { current: HTMLElement | null },
   movies: Movie[]
-) => {
-  const items = (await Promise.all(movies.map(fetchMovies)))?.map?.(
-    toWheelItems
-  )
-
-  // render images before they are passed to the canvas (in the wheel constructor)
-  await Promise.all(items.filter(({ image }) => image).map(toDecodeImage))
-
-  return new wheel(current, {
+) =>
+  new wheel(current, {
     borderWidth: 0,
     backgroundColors: ['transparent'],
     itemLabelColors: ['transparent'],
     rotationSpeedMax: 100000,
     rotationResistance: -20,
-    items,
+    items: await getWheelItems(movies),
   })
-}
 
 const toWheelItems = ({
   Search: [{ Poster, imdbID: label } = {}] = [],
@@ -71,23 +81,12 @@ function createImageElement(src: string): HTMLImageElement | undefined {
   return img
 }
 
-const toTitleCase = ({ Title, Year }: Movie) => ({
-  Title: Title.replace(
-    /\w\S*/g,
-    (text: string) =>
-      text.charAt(0).toUpperCase() + text.substring(1).toLowerCase()
-  ),
-  Year,
-})
-
-const fetchMovieData = async ({ Title, Year }: Movie) =>
+const fetchMovieDetailsFromOmdbApi = async ({ Title, Year }: Movie) =>
   (
     await fetch(
       `http://www.omdbapi.com/?apikey=44648a33&s=${Title}&y=${Year}&type=movie`
     )
   ).json()
-
-const fetchMovies = pipe(toTitleCase, fetchMovieData)
 
 const initWheel = async (
   wheelContainer: React.MutableRefObject<null>,
@@ -119,10 +118,10 @@ const rotateToCenterAndLockWheel = (currentIndex: number) => {
   lockWheel = true
   document.wheelInstance.isInteractive = false
   centerWheelItem({ currentIndex, type: 'elastic' })
-  setTimeout(() => {
-    // document.wheelInstance.items = [document.wheelInstance.items[currentIndex]]
-    centerWheelItem({ currentIndex: 0 })
-  }, 1000)
+  // setTimeout(() => {
+  //   document.wheelInstance.items = [document.wheelInstance.items[currentIndex]]
+  //   centerWheelItem({ currentIndex: 0 })
+  // }, 1000)
 }
 
 const centerWheelItem = ({
@@ -163,36 +162,6 @@ const destroyWheel = () => {
   document.wheelInstance.remove()
 }
 
-export default function Wheel({ movies }: { movies: Movie[] }) {
-  const wheelContainer = useRef(null)
-
-  useEffect(() => {
-    initWheel(wheelContainer, movies)
-    console.log('movies', movies)
-    document.clicks = [...document.querySelectorAll('#clicks > audio')]
-    return destroyWheel
-  }, [])
-  return (
-    <>
-      <div id='clicks'>
-        <audio src='/1.mp3' preload='auto'></audio>
-        <audio src='/2.mp3' preload='auto'></audio>
-        <audio src='/3.mp3' preload='auto'></audio>
-        <audio src='/4.mp3' preload='auto'></audio>
-        <audio src='/5.mp3' preload='auto'></audio>
-      </div>
-      <div id='loser'>
-        <audio src='/loser1.mp3' preload='auto'></audio>
-      </div>
-      <div id='winner'>
-        <audio src='/winner1.mp3' preload='auto'></audio>
-      </div>
-      <DownButton />
-      <div id='wheel' ref={wheelContainer}></div>
-    </>
-  )
-}
-
 const DownButton = () => {
   const [isAnimating, setIsAnimating] = useState(false)
   return (
@@ -213,10 +182,19 @@ const DownButton = () => {
       onClick={({ target }) => {
         const wheelContainer = document.querySelector('#wheel')
         const wheel = document.querySelector('canvas')
+        const movieList = document.querySelector('#movie-list')
+
+        if (movieList?.classList.contains('opacity-0')) {
+          movieList?.classList.remove('opacity-0')
+          movieList?.classList.add('opacity-100')
+        } else {
+          movieList?.classList.remove('opacity-100')
+          movieList?.classList.add('opacity-0')
+        }
 
         if (wheel) {
           if (isAnimating) {
-            wheel.animate([{ transform: `translateY(25%)` }], {
+            wheelContainer.animate([{ transform: `translate(-50%, -25%)` }], {
               duration: 1000, // Duration in milliseconds
               fill: 'forwards', // Maintain the end state after animation
               easing: 'cubic-bezier(0.075, 0.82, 0.165, 1)',
@@ -224,7 +202,7 @@ const DownButton = () => {
             wheelContainer?.removeAttribute('style')
             target.innerHTML = '▼'
           } else {
-            wheel.animate([{ transform: `translateY(75%)` }], {
+            wheelContainer.animate([{ transform: `translate(-50%, 25%)` }], {
               duration: 1000,
               fill: 'forwards',
               easing: 'cubic-bezier(0.075, 0.82, 0.165, 1)',
@@ -238,5 +216,36 @@ const DownButton = () => {
     >
       ▼
     </button>
+  )
+}
+
+export default function Wheel({ movies }: { movies: Movie[] }) {
+  const wheelContainer = useRef(null)
+
+  useEffect(() => {
+    initWheel(wheelContainer, movies)
+    console.log('movies', movies)
+    document.clicks = [...document.querySelectorAll('#clicks > audio')]
+    return destroyWheel
+  }, [movies])
+
+  return (
+    <>
+      <div id='clicks'>
+        <audio src='/1.mp3' preload='auto'></audio>
+        <audio src='/2.mp3' preload='auto'></audio>
+        <audio src='/3.mp3' preload='auto'></audio>
+        <audio src='/4.mp3' preload='auto'></audio>
+        <audio src='/5.mp3' preload='auto'></audio>
+      </div>
+      <div id='loser'>
+        <audio src='/loser1.mp3' preload='auto'></audio>
+      </div>
+      <div id='winner'>
+        <audio src='/winner1.mp3' preload='auto'></audio>
+      </div>
+      <DownButton />
+      <div id='wheel' ref={wheelContainer}></div>
+    </>
   )
 }

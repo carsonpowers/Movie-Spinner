@@ -30,7 +30,7 @@ body {
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -25%);
   min-width: 3000px;
 
   canvas {
@@ -39,7 +39,6 @@ body {
     width: 100vw !important;
     height: 200vh !important;
     position: relative;
-    transform: translateY(25%);
   }
 }
 
