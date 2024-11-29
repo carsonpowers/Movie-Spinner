@@ -102,7 +102,7 @@ const RemoveButton = ({ Title }) => (
     title={`Remove ${Title}`}
     aria-label={`Remove ${Title}`}
   >
-    <label className='cursor-pointer'>❌</label>
+    <label className='cursor-pointer'>✖️</label>
   </button>
 )
 
