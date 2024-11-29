@@ -1,7 +1,6 @@
-import Wheel from '../components/Wheel'
-import UI from '../components/UI'
 import { initializeApp } from 'firebase/app'
 import { getFirestore, collection, getDocs } from 'firebase/firestore'
+import Thing from '@/components/Thing'
 // import { snackbar } from 'mdui/functions/snackbar.js'
 
 const db = getFirestore(
@@ -27,10 +26,5 @@ async function getMovies() {
 
 export default async function Home() {
   const movies = await getMovies()
-  return (
-    <>
-      <UI movies={movies}></UI>
-      <Wheel movies={movies} />
-    </>
-  )
+  return <Thing movies={movies}></Thing>
 }
