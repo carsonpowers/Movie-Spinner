@@ -95,8 +95,9 @@ body {
 
     &:hover,
     :focus {
-      label {
+      >label {
         transform: translateY(-2px);
+        filter: brightness(2);
       }
     }
 

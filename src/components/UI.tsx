@@ -192,6 +192,7 @@ const MovieListItem = ({ id, Title, Year }: Movie) => (
         textOverflow: 'ellipsis',
         pointerEvents: 'none',
         flex: '1',
+        color: '#785dc8',
       }}
     >
       {Title}
