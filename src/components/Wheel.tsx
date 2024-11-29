@@ -6,12 +6,6 @@ import React, { useEffect, useRef, useState } from 'react'
 import { pipe } from 'lodash/fp'
 import { easeOutElastic } from 'easing-utils'
 
-interface Movie {
-  Title: string
-  Year: number
-  Poster: string
-}
-
 interface WheelItem {
   currentIndex: number
   rotation: number
@@ -28,9 +22,7 @@ let wheelInstance: any
 let lockWheel: boolean | undefined
 
 const getWheelItems = async (movies: Movie[]) => {
-  const wheelItems = (
-    await Promise.all(movies.map(fetchMovieDetailsFromOmdbApi))
-  )?.map?.(toWheelItems)
+  const wheelItems = movies?.map?.(toWheelItems)
   // render images before they are passed to the canvas (in the wheel constructor)
   await renderPosterImages(wheelItems)
   return wheelItems
@@ -58,13 +50,9 @@ const loadWheel = async (
     items: await getWheelItems(movies),
   })
 
-const toWheelItems = ({
-  Search: [{ Poster, imdbID: label } = {}] = [],
-}: {
-  Search: [Movie]
-}) => ({
+const toWheelItems = ({ Title: label, Year, id, Poster }) => ({
   label,
-  image: createImageElement(Poster),
+  image: Poster ? createImageElement(Poster) : undefined,
   ...itemConfig,
 })
 
@@ -80,13 +68,6 @@ function createImageElement(src: string): HTMLImageElement | undefined {
   img.src = src
   return img
 }
-
-const fetchMovieDetailsFromOmdbApi = async ({ Title, Year }: Movie) =>
-  (
-    await fetch(
-      `http://www.omdbapi.com/?apikey=44648a33&s=${Title}&y=${Year}&type=movie`
-    )
-  ).json()
 
 const initWheel = async (
   wheelContainer: React.MutableRefObject<null>,
@@ -175,7 +156,7 @@ const DownButton = () => {
         height: '50px',
         transform: 'translateX(-50%)',
         zIndex: 100,
-        border: 'solid 4px black',
+        border: 'solid 2px white',
         borderRadius: '10px',
         backgroundColor: 'black',
       }}
@@ -185,11 +166,11 @@ const DownButton = () => {
         const movieList = document.querySelector('#movie-list')
 
         if (movieList?.classList.contains('opacity-0')) {
-          movieList?.classList.remove('opacity-0')
           movieList?.classList.add('opacity-100')
+          movieList?.classList.remove('opacity-0')
         } else {
-          movieList?.classList.remove('opacity-100')
           movieList?.classList.add('opacity-0')
+          movieList?.classList.remove('opacity-100')
         }
 
         if (wheel) {
@@ -224,7 +205,6 @@ export default function Wheel({ movies }: { movies: Movie[] }) {
 
   useEffect(() => {
     initWheel(wheelContainer, movies)
-    console.log('movies', movies)
     document.clicks = [...document.querySelectorAll('#clicks > audio')]
     return destroyWheel
   }, [movies])

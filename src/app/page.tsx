@@ -29,8 +29,8 @@ export default async function Home() {
   const movies = await getMovies()
   return (
     <>
-      <Wheel movies={movies} />
       <UI movies={movies}></UI>
+      <Wheel movies={movies} />
     </>
   )
 }

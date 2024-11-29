@@ -5,12 +5,6 @@ import autocompleter from 'autocompleter'
 import { useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 
-interface Movie {
-  Title: string
-  imdbID: string
-  Year: string
-}
-
 let _refresh
 
 const db = getFirestore(
@@ -26,9 +20,13 @@ const db = getFirestore(
 
 const fetchMovieData = async ({ Title }: { Title: string }) => {
   try {
-    const response = await fetch(
-      `http://www.omdbapi.com/?apikey=44648a33&s=${Title}&type=movie`
-    )
+    const response = await fetch('/api/fetchMovieData', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ Title }),
+    })
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
@@ -42,8 +40,21 @@ const fetchMovieData = async ({ Title }: { Title: string }) => {
 
 const addMovie = async (movie: any, docId: string) => {
   if (!docId) return
-  await setDoc(doc(db, 'movies', docId), movie)
-  _refresh()
+  try {
+    const response = await fetch('/api/addMovie', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ movie, docId }),
+    })
+    if (!response.ok) {
+      throw new Error('Failed to add movie')
+    }
+    _refresh()
+  } catch (error) {
+    console.error('Error adding movie:', error)
+  }
 }
 
 const removeMovie = async ({ target }: { target: HTMLElement }) => {
@@ -118,27 +129,30 @@ const initAutoCompleter = (input: HTMLInputElement) => {
   autocompleter({
     input,
     showOnFocus: true,
+    minLength: 1,
+    debounceWaitMs: 300,
     fetch: async (text, update) => {
-      const movieData = (await fetchMovieData({ Title: text })).Search?.map?.(
-        ({ Title: label, imdbID, Year }: Movie) => ({
-          label,
+      let movieData = (await fetchMovieData({ Title: text }))?.Search?.map?.(
+        ({ Title: label, Poster, imdbID, Year }: Movie) => ({
+          label: `${label} (${Year})`,
           value: label,
+          Poster,
           imdbID,
           Year,
         })
-      ) || [{ label: 'No results found' }]
-      update(movieData)
+      )
+      update(movieData?.length ? movieData : [{ label: 'No results found' }])
     },
-    onSelect: ({ label: Title = '', Year, imdbID }: Movie) => {
+    onSelect: ({ value: Title = '', Year, Poster, imdbID }: Movie) => {
       if (!imdbID) return
       input.value = Title
       input.blur()
-      addMovie({ Title, Year }, imdbID)
+      addMovie({ Title, Year, Poster }, imdbID)
     },
   })
 }
 
-const AddListItem = () => {
+const MovieInputListItem = () => {
   const inputRef = useRef(null)
 
   useEffect(() => {
@@ -166,36 +180,42 @@ const AddListItem = () => {
   )
 }
 
-const MovieList = ({ movies }: { movies: [Movie] }) => (
+const MovieListItem = ({ id, Title, Year }: Movie) => (
+  <ListItem key={id} id={id} Title={Title}>
+    <label
+      style={{
+        display: 'block',
+        maxWidth: 'calc(100% - 3rem)',
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        pointerEvents: 'none',
+        flex: '1',
+      }}
+    >
+      {Title}
+      {` (${Year})`}
+    </label>
+    <RemoveButton Title={Title} />
+  </ListItem>
+)
+
+const MovieList = ({ children }) => (
   <ul
     id='movie-list'
     className='opacity-0 overflow-hidden list-none p-0 m-0 border border-white rounded-2xl text-1xl absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 max-w-full'
     style={{ transition: 'opacity 0.5s' }}
   >
-    {movies.map(({ id, Title, Year }) => (
-      <ListItem key={id} id={id} Title={Title}>
-        <label
-          style={{
-            display: 'block',
-            maxWidth: 'calc(100% - 3rem)',
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            pointerEvents: 'none',
-            flex: '1',
-          }}
-        >
-          {Title}
-          {` (${Year})`}
-        </label>
-        <RemoveButton Title={Title} />
-      </ListItem>
-    ))}
-    <AddListItem />
+    {children}
   </ul>
 )
 
-export default function UI({ movies }) {
+export default function UI({ movies }: { movies: Movie[] }) {
   _refresh = useRouter()?.refresh
-  return <MovieList movies={movies} />
+  return (
+    <MovieList>
+      {movies.map(MovieListItem)}
+      <MovieInputListItem />
+    </MovieList>
+  )
 }
