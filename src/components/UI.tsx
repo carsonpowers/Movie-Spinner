@@ -97,6 +97,7 @@ const removeMovie = async ({ target }: { target: HTMLElement }) => {
 
 const RemoveButton = ({ Title }) => (
   <button
+    id='remove-button'
     onClick={removeMovie}
     title={`Remove ${Title}`}
     aria-label={`Remove ${Title}`}
