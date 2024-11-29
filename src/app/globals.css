@@ -87,6 +87,19 @@ body {
 
 #movie-list {
   >li {
+
+    label {
+      transition: transform 1s cubic-bezier(0.19, 1, 0.22, 1);
+    }
+
+    &:hover,
+    :focus {
+      label {
+        transform: translateY(-2px);
+        filter: saturate(2.5);
+      }
+    }
+
     >#remove-button {
       transition: transform 1s cubic-bezier(0.19, 1, 0.22, 1);
 
