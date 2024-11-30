@@ -1,8 +1,9 @@
 import { initializeApp } from 'firebase/app'
 import { getFirestore, collection, getDocs } from 'firebase/firestore'
-import Wheel from '../components/wheel'
-import UI from '../components/ui'
+import Wheel from '@/components/wheel'
+import UI from '@/components/ui'
 import SignIn from '@/components/sign-in'
+import DownButton from '@/components/down-button'
 // import { snackbar } from 'mdui/functions/snackbar.js'
 
 const db = getFirestore(
@@ -33,6 +34,7 @@ export default async function Home() {
       <SignIn />
       <UI movies={movies}></UI>
       <Wheel movies={movies} />
+      <DownButton />
     </>
   )
 }

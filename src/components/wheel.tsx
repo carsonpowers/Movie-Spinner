@@ -5,7 +5,6 @@ import { Wheel as wheel } from 'spin-wheel'
 import React, { useEffect, useRef, useState } from 'react'
 import { pipe } from 'lodash/fp'
 import { easeOutElastic } from 'easing-utils'
-import DownButton from './down-button'
 
 interface WheelItem {
   currentIndex: number
@@ -168,7 +167,6 @@ export default function Wheel({ movies }: { movies: Movie[] }) {
       <div id='winner'>
         <audio src='/winner1.mp3' preload='auto'></audio>
       </div>
-      <DownButton />
       <div id='wheel' ref={wheelContainer}></div>
     </>
   )

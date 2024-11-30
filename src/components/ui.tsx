@@ -119,7 +119,9 @@ const ListItem = ({
   className?: string
 }) => (
   <li
-    className={`relative justify-between capitalize p-2 border border-white cursor-pointer rounded-xl m-2 flex ${className}`}
+    className={`relative justify-between capitalize p-2 border border-white cursor-pointer rounded-xl m-2 flex ${
+      className || ''
+    }`}
     key={id}
     data-id={id}
     title={Title}
