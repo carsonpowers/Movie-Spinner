@@ -5,7 +5,7 @@ import { Wheel as wheel } from 'spin-wheel'
 import React, { useEffect, useRef, useState } from 'react'
 import { pipe } from 'lodash/fp'
 import { easeOutElastic } from 'easing-utils'
-import DownButton from './DownButton'
+import DownButton from './down-button'
 
 interface WheelItem {
   currentIndex: number
