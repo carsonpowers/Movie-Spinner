@@ -110,14 +110,16 @@ const ListItem = ({
   id,
   Title,
   children,
+  className,
 }: {
-  id: string
-  Title: string
+  id?: string
+  Title?: string
   children: React.ReactNode
-  key: string
+  key?: string
+  className?: string
 }) => (
   <li
-    className='relative justify-between capitalize p-2 border border-white cursor-pointer rounded-xl m-2 flex'
+    className={`relative justify-between capitalize p-2 border border-white cursor-pointer rounded-xl m-2 flex ${className}`}
     key={id}
     data-id={id}
     title={Title}
@@ -162,7 +164,7 @@ const MovieInputListItem = () => {
   }, [])
 
   return (
-    <ListItem>
+    <ListItem className='sticky bottom-0'>
       <input
         style={{
           borderTopLeftRadius: '0.5rem',
