@@ -147,23 +147,10 @@ const DownButton = () => {
   const [isAnimating, setIsAnimating] = useState(false)
   return (
     <button
-      style={{
-        position: 'absolute',
-        bottom: 10,
-        left: '50%',
-        right: '50%',
-        width: '100px',
-        height: '50px',
-        transform: 'translateX(-50%)',
-        zIndex: 100,
-        border: 'solid 2px white',
-        borderRadius: '10px',
-        backgroundColor: 'black',
-      }}
+      className='absolute bottom-2.5 left-1/2 right-1/2 w-24 h-12 transform -translate-x-1/2 z-10 border-2 border-white rounded-lg bg-black'
       onClick={({ target }) => {
         const wheelContainer = document.querySelector('#wheel')
         const wheel = document.querySelector('canvas')
-        const movieList = document.querySelector('#movie-list')
         const movieListContainer = document.querySelector(
           '#movie-list-container'
         )

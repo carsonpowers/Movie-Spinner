@@ -166,18 +166,11 @@ const MovieInputListItem = () => {
   return (
     <ListItem className='sticky bottom-0'>
       <input
-        style={{
-          borderTopLeftRadius: '0.5rem',
-          borderTopRightRadius: '0.5rem',
-          borderBottomLeftRadius: '0.5rem',
-          borderBottomRightRadius: '0.5rem',
-          outline: 'none',
-        }}
+        className='rounded-lg outline-none w-full text-center text-black'
         id='movie-input'
         ref={inputRef}
         type='text'
         placeholder='Add a movie...'
-        className='w-full text-center text-black'
       />
     </ListItem>
   )
@@ -185,18 +178,7 @@ const MovieInputListItem = () => {
 
 const MovieListItem = ({ id, Title, Year }: Movie) => (
   <ListItem key={id} id={id} Title={Title}>
-    <label
-      style={{
-        display: 'block',
-        maxWidth: 'calc(100% - 3rem)',
-        whiteSpace: 'nowrap',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        pointerEvents: 'none',
-        flex: '1',
-        color: '#785dc8',
-      }}
-    >
+    <label className='block max-w-[calc(100%-3rem)] whitespace-nowrap overflow-hidden text-ellipsis pointer-events-none flex-1 text-[#785dc8]'>
       {Title}
       {` (${Year})`}
     </label>
