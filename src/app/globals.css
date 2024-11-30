@@ -89,13 +89,12 @@ body {
   height: 100vh;
   display: flex;
   transition: all 1s cubic-bezier(0.19, 1, 0.22, 1);
-  align-items: center;
   justify-content: center;
 }
 
 #movie-list {
 
-
+  margin-top: 4rem;
 
   &::-webkit-scrollbar {
     width: 4px;
@@ -119,6 +118,8 @@ body {
 
 
   >li {
+
+    background-color: black;
 
     transition: all 1s cubic-bezier(0.19, 1, 0.22, 1);
 
