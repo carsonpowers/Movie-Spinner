@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app'
 import { getFirestore, collection, getDocs } from 'firebase/firestore'
 import Thing from '@/components/Thing'
+import SignIn from '../../components/sign-in'
 // import { snackbar } from 'mdui/functions/snackbar.js'
 
 const db = getFirestore(
@@ -26,5 +27,10 @@ async function getMovies() {
 
 export default async function Home() {
   const movies = await getMovies()
-  return <Thing movies={movies}></Thing>
+  return (
+    <>
+      <SignIn />
+      <Thing movies={movies}></Thing>
+    </>
+  )
 }
