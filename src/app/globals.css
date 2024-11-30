@@ -95,6 +95,26 @@ body {
 
 #movie-list {
 
+
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #785dc8;
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+
+
+  overflow: auto;
+  max-height: 80vh;
+
   transition: all 1s cubic-bezier(0.19, 1, 0.22, 1);
 
 
