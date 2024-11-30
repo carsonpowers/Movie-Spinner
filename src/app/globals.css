@@ -88,6 +88,8 @@ body {
 #movie-list {
   >li {
 
+    transition: all 1s cubic-bezier(0.19, 1, 0.22, 1);
+
     * {
       transition: all 1s cubic-bezier(0.19, 1, 0.22, 1);
     }
@@ -95,8 +97,9 @@ body {
 
     &:hover,
     :focus {
+      transform: translateY(-2px);
+
       >label {
-        transform: translateY(-2px);
         filter: brightness(2);
       }
     }
