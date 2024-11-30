@@ -202,22 +202,16 @@ const MovieListItem = ({ id, Title, Year }: Movie) => (
   </ListItem>
 )
 
-const MovieList = ({ children }) => (
-  <ul
-    id='movie-list'
-    className='opacity-0 overflow-hidden list-none p-0 m-0 border border-white rounded-2xl text-1xl absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 max-w-full'
-    style={{ transition: 'opacity 0.5s' }}
-  >
-    {children}
-  </ul>
-)
+const MovieList = ({ children }) => <ul id='movie-list'>{children}</ul>
 
 export default function UI({ movies }: { movies: Movie[] }) {
   _refresh = useRouter()?.refresh
   return (
-    <MovieList>
-      {movies.map(MovieListItem)}
-      <MovieInputListItem />
-    </MovieList>
+    <section id='movie-list-container' className='opacity-0'>
+      <MovieList>
+        {movies.map(MovieListItem)}
+        <MovieInputListItem />
+      </MovieList>
+    </section>
   )
 }

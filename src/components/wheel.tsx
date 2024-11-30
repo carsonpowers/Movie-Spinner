@@ -164,13 +164,16 @@ const DownButton = () => {
         const wheelContainer = document.querySelector('#wheel')
         const wheel = document.querySelector('canvas')
         const movieList = document.querySelector('#movie-list')
+        const movieListContainer = document.querySelector(
+          '#movie-list-container'
+        )
 
-        if (movieList?.classList.contains('opacity-0')) {
-          movieList?.classList.add('opacity-100')
-          movieList?.classList.remove('opacity-0')
+        if (movieListContainer?.classList.contains('opacity-0')) {
+          movieListContainer?.classList.add('opacity-100')
+          movieListContainer?.classList.remove('opacity-0')
         } else {
-          movieList?.classList.add('opacity-0')
-          movieList?.classList.remove('opacity-100')
+          movieListContainer?.classList.add('opacity-0')
+          movieListContainer?.classList.remove('opacity-100')
         }
 
         if (wheel) {

@@ -85,7 +85,19 @@ body {
 
 }
 
+#movie-list-container {
+  height: 100vh;
+  display: flex;
+  transition: all 1s cubic-bezier(0.19, 1, 0.22, 1);
+  align-items: center;
+  justify-content: center;
+}
+
 #movie-list {
+
+  transition: all 1s cubic-bezier(0.19, 1, 0.22, 1);
+
+
   >li {
 
     transition: all 1s cubic-bezier(0.19, 1, 0.22, 1);
