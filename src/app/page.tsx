@@ -4,6 +4,7 @@ import Wheel from '@/components/wheel'
 import UI from '@/components/ui'
 import SignIn from '@/components/sign-in'
 import DownButton from '@/components/down-button'
+import { auth } from 'auth'
 // import { snackbar } from 'mdui/functions/snackbar.js'
 
 const db = getFirestore(
@@ -29,6 +30,8 @@ async function getMovies() {
 
 export default async function Home() {
   const movies = await getMovies()
+  const session = await auth()
+  console.log(session?.user)
   return (
     <>
       <SignIn />
