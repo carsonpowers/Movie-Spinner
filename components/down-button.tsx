@@ -16,6 +16,7 @@ import Alert from '@mui/material/Alert'
 import Slide from '@mui/material/Slide'
 import Tooltip from '@mui/material/Tooltip'
 import { TransitionProps } from '@mui/material/transitions'
+import { showWheel, hideWheel } from './wheel'
 
 interface DownButtonProps {
   movieCount: number
@@ -36,34 +37,6 @@ function SlideRightTransition(
   props: TransitionProps & { children: React.ReactElement }
 ) {
   return <Slide {...props} direction='right' />
-}
-
-const showWheel = () => {
-  const wheelContainer = document.querySelector('#wheel')
-  const movieListContainer = document.querySelector('#movie-list-container')
-
-  movieListContainer?.classList.add('opacity-0')
-  movieListContainer?.classList.remove('opacity-100')
-
-  wheelContainer?.animate([{ transform: `translate(-50%, -25%)` }], {
-    duration: 1000,
-    fill: 'forwards',
-    easing: 'cubic-bezier(0.075, 0.82, 0.165, 1)',
-  })
-}
-
-const hideWheel = () => {
-  const wheelContainer = document.querySelector('#wheel')
-  const movieListContainer = document.querySelector('#movie-list-container')
-
-  movieListContainer?.classList.add('opacity-100')
-  movieListContainer?.classList.remove('opacity-0')
-
-  wheelContainer?.animate([{ transform: `translate(-50%, 25%)` }], {
-    duration: 1000,
-    fill: 'forwards',
-    easing: 'cubic-bezier(0.075, 0.82, 0.165, 1)',
-  })
 }
 
 const DownButton = ({ movieCount }: DownButtonProps) => {

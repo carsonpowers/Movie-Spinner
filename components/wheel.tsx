@@ -47,6 +47,34 @@ const itemConfig = {
 let lockWheel: boolean | undefined
 let moviesRef: Movie[] = []
 
+export const showWheel = () => {
+  const wheelContainer = document.querySelector('#wheel')
+  const movieListContainer = document.querySelector('#movie-list-container')
+
+  movieListContainer?.classList.add('opacity-0')
+  movieListContainer?.classList.remove('opacity-100')
+
+  wheelContainer?.animate([{ transform: `translate(-50%, -25%)` }], {
+    duration: 1000,
+    fill: 'forwards',
+    easing: 'cubic-bezier(0.075, 0.82, 0.165, 1)',
+  })
+}
+
+export const hideWheel = () => {
+  const wheelContainer = document.querySelector('#wheel')
+  const movieListContainer = document.querySelector('#movie-list-container')
+
+  movieListContainer?.classList.add('opacity-100')
+  movieListContainer?.classList.remove('opacity-0')
+
+  wheelContainer?.animate([{ transform: `translate(-50%, 25%)` }], {
+    duration: 1000,
+    fill: 'forwards',
+    easing: 'cubic-bezier(0.075, 0.82, 0.165, 1)',
+  })
+}
+
 const getWheelItems = async (movies: Movie[]) => {
   const wheelItems = movies?.map?.(toWheelItems) || []
   await renderPosterImages(wheelItems)
