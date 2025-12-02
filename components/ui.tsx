@@ -12,6 +12,7 @@ import Fab from '@mui/material/Fab'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import MovieIcon from '@mui/icons-material/Movie'
 import DeleteIcon from '@mui/icons-material/Delete'
+import CloseIcon from '@mui/icons-material/Close'
 import Snackbar from '@mui/material/Snackbar'
 import Alert from '@mui/material/Alert'
 import Slide from '@mui/material/Slide'
@@ -612,6 +613,7 @@ export default function UI({
     severity: 'success',
   })
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid')
+  const [videoPlayerVisible, setVideoPlayerVisible] = useState(false)
   const [filterText, setFilterText] = useState('')
   const [watchedFilter, setWatchedFilter] = useState<
     'all' | 'hideWatched' | 'onlyWatched'
@@ -638,6 +640,21 @@ export default function UI({
 
   useEffect(() => {
     ;(document as any).flips = [...document.querySelectorAll('#flips > audio')]
+
+    // Observe video player visibility
+    const videoPlayer = document.getElementById('trailer-player')
+    if (videoPlayer) {
+      const observer = new MutationObserver(() => {
+        setVideoPlayerVisible(videoPlayer.style.display === 'block')
+      })
+      observer.observe(videoPlayer, {
+        attributes: true,
+        attributeFilter: ['style'],
+      })
+      
+      // Cleanup
+      return () => observer.disconnect()
+    }
 
     // Listen for view changes from settings
     const handleViewChange = (event: CustomEvent) => {
@@ -804,6 +821,40 @@ export default function UI({
           {snackbar.message}
         </Alert>
       </Snackbar>
+      {videoPlayerVisible && (
+        <Fab
+          size='medium'
+          onClick={() => {
+            const videoPlayer = document.getElementById('trailer-player') as HTMLVideoElement
+            if (videoPlayer) {
+              videoPlayer.style.display = 'none'
+              videoPlayer.pause()
+              setVideoPlayerVisible(false)
+            }
+          }}
+          sx={{
+            position: 'fixed',
+            top: 16,
+            right: 16,
+            zIndex: 2001,
+            bgcolor: 'rgb(220 38 38 / 0.85)',
+            '&:hover': {
+              bgcolor: 'rgb(220 38 38)',
+              '& svg': {
+                transform: 'scale(1.1)',
+                transition: 'transform 0.1s ease-in-out',
+              },
+            },
+            boxShadow: '0 4px 6px rgba(0,0,0,0.5)',
+            '& svg': {
+              transition: 'transform 0.1s ease-in-out',
+            },
+          }}
+          aria-label='Close video'
+        >
+          <CloseIcon sx={{ color: 'white' }} />
+        </Fab>
+      )}
       <video
         id='trailer-player'
         controls
@@ -818,7 +869,6 @@ export default function UI({
           backgroundColor: '#000',
           zIndex: 2000,
         }}
-        onClick={(e) => {}}
       />
     </>
   )
