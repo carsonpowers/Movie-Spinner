@@ -149,8 +149,26 @@ const scrapeAndPlayTrailer = async (currentIndex: number) => {
     const data = await response.json()
 
     if (data.videoUrl) {
-      // Open video in a new window since CORS is blocking direct playback
-      window.open(data.videoUrl, '_blank', 'width=800,height=600')
+      const videoPlayer = document.getElementById(
+        'trailer-player'
+      ) as HTMLVideoElement
+      const wheelElement = document.getElementById('wheel') as HTMLDivElement
+
+      if (videoPlayer && wheelElement) {
+        // Hide the wheel
+
+        // Set video source and display it
+        videoPlayer.src = data.videoUrl
+        videoPlayer.style.display = 'block'
+        videoPlayer.play().catch((err) => {
+          console.error('Error playing video:', err)
+        })
+
+        // Show wheel again when video ends or is closed
+        videoPlayer.onended = () => {
+          videoPlayer.style.display = 'none'
+        }
+      }
     }
   } catch (error) {
     console.error('Failed to fetch trailer:', error)
@@ -262,17 +280,17 @@ export default function Wheel({ movies }: { movies: Movie[] }) {
       <video
         id='trailer-player'
         controls
-        crossOrigin='anonymous'
         style={{
           display: 'none',
           position: 'fixed',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          maxWidth: '80vw',
-          maxHeight: '80vh',
-          zIndex: 1000,
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          objectFit: 'contain',
+          backgroundColor: '#000',
         }}
+        onClick={(e) => {}}
       />
       <div id='wheel' ref={wheelContainer}></div>
     </>
