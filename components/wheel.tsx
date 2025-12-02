@@ -45,6 +45,7 @@ const itemConfig = {
 }
 
 let lockWheel: boolean | undefined
+let moviesRef: Movie[] = []
 
 const getWheelItems = async (movies: Movie[]) => {
   const wheelItems = movies?.map?.(toWheelItems) || []
@@ -105,6 +106,7 @@ const initWheel = async (
   wheelContainer: React.MutableRefObject<HTMLDivElement | null>,
   movies: Movie[]
 ) => {
+  moviesRef = movies
   const wheel = await loadWheel(wheelContainer, movies)
   if (!wheel) return
 
@@ -120,6 +122,7 @@ const onRest = ({ currentIndex }: WheelEvent) => {
   else {
     rotateToCenterAndLockWheel(currentIndex)
     playResultSound()
+    scrapeAndPlayTrailer(currentIndex)
   }
 }
 
@@ -134,6 +137,23 @@ const playResultSound = () => {
   const audio = document.querySelector('#result audio') as HTMLAudioElement
   if (audio) {
     audio.play()
+  }
+}
+
+const scrapeAndPlayTrailer = async (currentIndex: number) => {
+  const movie = moviesRef[currentIndex]
+  if (!movie?.id) return
+
+  try {
+    const response = await fetch(`/api/scrape-trailer?imdbId=${movie.id}`)
+    const data = await response.json()
+
+    if (data.videoUrl) {
+      // Open video in a new window since CORS is blocking direct playback
+      window.open(data.videoUrl, '_blank', 'width=800,height=600')
+    }
+  } catch (error) {
+    console.error('Failed to fetch trailer:', error)
   }
 }
 
@@ -239,6 +259,21 @@ export default function Wheel({ movies }: { movies: Movie[] }) {
       <div id='result'>
         <audio src='/fart-1.mp3' preload='auto'></audio>
       </div>
+      <video
+        id='trailer-player'
+        controls
+        crossOrigin='anonymous'
+        style={{
+          display: 'none',
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          maxWidth: '80vw',
+          maxHeight: '80vh',
+          zIndex: 1000,
+        }}
+      />
       <div id='wheel' ref={wheelContainer}></div>
     </>
   )
