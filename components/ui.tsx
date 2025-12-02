@@ -804,6 +804,22 @@ export default function UI({
           {snackbar.message}
         </Alert>
       </Snackbar>
+      <video
+        id='trailer-player'
+        controls
+        style={{
+          display: 'none',
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          objectFit: 'contain',
+          backgroundColor: '#000',
+          zIndex: 2000,
+        }}
+        onClick={(e) => {}}
+      />
     </>
   )
 }

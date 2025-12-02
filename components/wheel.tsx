@@ -168,7 +168,7 @@ const playResultSound = () => {
   }
 }
 
-const scrapeAndPlayTrailer = async (currentIndex: number) => {
+export const scrapeAndPlayTrailer = async (currentIndex: number) => {
   const movie = moviesRef[currentIndex]
   if (!movie?.id) return
 
@@ -180,9 +180,8 @@ const scrapeAndPlayTrailer = async (currentIndex: number) => {
       const videoPlayer = document.getElementById(
         'trailer-player'
       ) as HTMLVideoElement
-      const wheelElement = document.getElementById('wheel') as HTMLDivElement
 
-      if (videoPlayer && wheelElement) {
+      if (videoPlayer) {
         // Set video source and display it
         videoPlayer.src = data.videoUrl
         videoPlayer.style.display = 'block'
@@ -302,21 +301,6 @@ export default function Wheel({ movies }: { movies: Movie[] }) {
       <div id='result'>
         <audio src='/fart-1.mp3' preload='auto'></audio>
       </div>
-      <video
-        id='trailer-player'
-        controls
-        style={{
-          display: 'none',
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100vw',
-          height: '100vh',
-          objectFit: 'contain',
-          backgroundColor: '#000',
-        }}
-        onClick={(e) => {}}
-      />
       <div id='wheel' ref={wheelContainer}></div>
     </>
   )

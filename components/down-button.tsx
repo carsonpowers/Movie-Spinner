@@ -93,6 +93,17 @@ const DownButton = ({ movieCount }: DownButtonProps) => {
       return
     }
 
+    // Toggle wheel if clicking the wheel button when it's already selected
+    if (newValue === 0 && value === 0) {
+      // Toggle to list view
+      setValue(1)
+      hideWheel()
+      const viewMode = 'grid'
+      localStorage.setItem('movieView', viewMode)
+      window.dispatchEvent(new CustomEvent('viewChange', { detail: viewMode }))
+      return
+    }
+
     // Update view mode based on button selection
     if (newValue === 1 || newValue === 2) {
       const viewMode = newValue === 2 ? 'table' : 'grid'
