@@ -117,13 +117,23 @@ const initWheel = async (
 
 const onRest = ({ currentIndex }: WheelEvent) => {
   if (lockWheel) releaseWheelLock(currentIndex)
-  else rotateToCenterAndLockWheel(currentIndex)
+  else {
+    rotateToCenterAndLockWheel(currentIndex)
+    playResultSound()
+  }
 }
 
 const makeARandomClickNoise = () => {
   const clicks = (document as ExtendedDocument).clicks
   if (clicks) {
     clicks[Math.round(Math.random() * 4)].play()
+  }
+}
+
+const playResultSound = () => {
+  const audio = document.querySelector('#result audio') as HTMLAudioElement
+  if (audio) {
+    audio.play()
   }
 }
 
@@ -225,6 +235,9 @@ export default function Wheel({ movies }: { movies: Movie[] }) {
       </div>
       <div id='winner'>
         <audio src='/winner1.mp3' preload='auto'></audio>
+      </div>
+      <div id='result'>
+        <audio src='/fart-1.mp3' preload='auto'></audio>
       </div>
       <div id='wheel' ref={wheelContainer}></div>
     </>
