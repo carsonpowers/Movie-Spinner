@@ -1,0 +1,8 @@
+[install]
+production = false
+optional = true
+dev = true
+peer = true
+
+[install.lockfile]
+save = true

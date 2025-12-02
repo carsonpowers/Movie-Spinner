@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.local
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - AUTH_TRUST_HOST=true
+      - HOSTNAME=0.0.0.0
+      - WATCHPACK_POLLING=true
+    volumes:
+      # Mount source code for hot reload
+      - ./app:/app/app
+      - ./components:/app/components
+      - ./lib:/app/lib
+      - ./public:/app/public
+      - ./types:/app/types
+      - ./middleware.ts:/app/middleware.ts
+      - ./auth.ts:/app/auth.ts
+      - ./tailwind.config.js:/app/tailwind.config.js
+      - ./next.config.js:/app/next.config.js
+      - ./postcss.config.js:/app/postcss.config.js
+      # Prevent overwriting node_modules and .next
+      - /app/node_modules
+      - /app/.next
+    restart: unless-stopped
+    networks:
+      - movie-wheel-network
+
+networks:
+  movie-wheel-network:
+    driver: bridge
