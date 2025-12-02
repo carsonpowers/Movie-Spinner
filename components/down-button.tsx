@@ -38,6 +38,34 @@ function SlideRightTransition(
   return <Slide {...props} direction='right' />
 }
 
+const showWheel = () => {
+  const wheelContainer = document.querySelector('#wheel')
+  const movieListContainer = document.querySelector('#movie-list-container')
+
+  movieListContainer?.classList.add('opacity-0')
+  movieListContainer?.classList.remove('opacity-100')
+
+  wheelContainer?.animate([{ transform: `translate(-50%, -25%)` }], {
+    duration: 1000,
+    fill: 'forwards',
+    easing: 'cubic-bezier(0.075, 0.82, 0.165, 1)',
+  })
+}
+
+const hideWheel = () => {
+  const wheelContainer = document.querySelector('#wheel')
+  const movieListContainer = document.querySelector('#movie-list-container')
+
+  movieListContainer?.classList.add('opacity-100')
+  movieListContainer?.classList.remove('opacity-0')
+
+  wheelContainer?.animate([{ transform: `translate(-50%, 25%)` }], {
+    duration: 1000,
+    fill: 'forwards',
+    easing: 'cubic-bezier(0.075, 0.82, 0.165, 1)',
+  })
+}
+
 const DownButton = ({ movieCount }: DownButtonProps) => {
   const [value, setValue] = useState(1) // 0: wheel, 1: grid, 2: table
   const [snackbars, setSnackbars] = useState<SnackbarItem[]>([])
@@ -101,30 +129,8 @@ const DownButton = ({ movieCount }: DownButtonProps) => {
 
     setValue(newValue)
 
-    const wheelContainer = document.querySelector('#wheel')
-    const movieListContainer = document.querySelector('#movie-list-container')
-
-    if (newValue === 0) {
-      // Show wheel, hide movies
-      movieListContainer?.classList.add('opacity-0')
-      movieListContainer?.classList.remove('opacity-100')
-
-      wheelContainer?.animate([{ transform: `translate(-50%, -25%)` }], {
-        duration: 1000,
-        fill: 'forwards',
-        easing: 'cubic-bezier(0.075, 0.82, 0.165, 1)',
-      })
-    } else {
-      // Show movies, hide wheel
-      movieListContainer?.classList.add('opacity-100')
-      movieListContainer?.classList.remove('opacity-0')
-
-      wheelContainer?.animate([{ transform: `translate(-50%, 25%)` }], {
-        duration: 1000,
-        fill: 'forwards',
-        easing: 'cubic-bezier(0.075, 0.82, 0.165, 1)',
-      })
-    }
+    if (newValue === 0) showWheel()
+    else hideWheel()
   }
 
   return (
