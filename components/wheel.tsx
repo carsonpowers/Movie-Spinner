@@ -155,8 +155,6 @@ const scrapeAndPlayTrailer = async (currentIndex: number) => {
       const wheelElement = document.getElementById('wheel') as HTMLDivElement
 
       if (videoPlayer && wheelElement) {
-        // Hide the wheel
-
         // Set video source and display it
         videoPlayer.src = data.videoUrl
         videoPlayer.style.display = 'block'
@@ -164,7 +162,6 @@ const scrapeAndPlayTrailer = async (currentIndex: number) => {
           console.error('Error playing video:', err)
         })
 
-        // Show wheel again when video ends or is closed
         videoPlayer.onended = () => {
           videoPlayer.style.display = 'none'
         }
