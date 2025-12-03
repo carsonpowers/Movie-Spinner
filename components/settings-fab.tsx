@@ -17,6 +17,7 @@ export default function SettingsFab() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [movieSize, setMovieSize] = useState(11) // Default 11rem
   const [watchedFilter, setWatchedFilter] = useState<'all' | 'hideWatched' | 'onlyWatched'>('all')
+  const [wheelFriction, setWheelFriction] = useState(-40) // Default friction
 
   useEffect(() => {
     // Load saved movie size from localStorage
@@ -33,6 +34,16 @@ export default function SettingsFab() {
       setWatchedFilter(savedFilter)
       window.dispatchEvent(
         new CustomEvent('watchedFilterChange', { detail: savedFilter })
+      )
+    }
+
+    // Load wheel friction preference
+    const savedFriction = localStorage.getItem('wheelFriction')
+    if (savedFriction) {
+      const friction = parseFloat(savedFriction)
+      setWheelFriction(friction)
+      window.dispatchEvent(
+        new CustomEvent('wheelFrictionChange', { detail: friction })
       )
     }
   }, [])
@@ -71,6 +82,15 @@ export default function SettingsFab() {
     localStorage.setItem('watchedFilter', newFilter)
     window.dispatchEvent(
       new CustomEvent('watchedFilterChange', { detail: newFilter })
+    )
+  }
+
+  const handleWheelFrictionChange = (_event: Event, value: number | number[]) => {
+    const friction = Array.isArray(value) ? value[0] : value
+    setWheelFriction(friction)
+    localStorage.setItem('wheelFriction', friction.toString())
+    window.dispatchEvent(
+      new CustomEvent('wheelFrictionChange', { detail: friction })
     )
   }
 
@@ -139,6 +159,31 @@ export default function SettingsFab() {
               step={0.5}
               valueLabelDisplay='auto'
               valueLabelFormat={(value) => `${value}rem`}
+              sx={{
+                flex: 1,
+                '& .MuiSlider-thumb': {
+                  '&:hover, &.Mui-focusVisible': {
+                    boxShadow: '0 0 0 8px rgba(107, 114, 128, 0.16)',
+                  },
+                },
+              }}
+            />
+          </Box>
+          <Divider sx={{ my: 2 }} />
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Typography
+              variant='body2'
+              sx={{ minWidth: '2.5rem', fontWeight: 600 }}
+            >
+              Friction
+            </Typography>
+            <Slider
+              value={wheelFriction}
+              onChange={handleWheelFrictionChange}
+              min={-100}
+              max={-10}
+              step={5}
+              valueLabelDisplay='auto'
               sx={{
                 flex: 1,
                 '& .MuiSlider-thumb': {

@@ -94,12 +94,16 @@ const loadWheel = async (
 ): Promise<WheelLib | null> => {
   if (!current || !movies || movies.length === 0) return null
 
+  // Load friction from localStorage or use default
+  const savedFriction = localStorage.getItem('wheelFriction')
+  const friction = savedFriction ? parseFloat(savedFriction) : -40
+
   return new WheelLib(current, {
     borderWidth: 0,
     backgroundColors: ['transparent'],
     itemLabelColors: ['transparent'],
     rotationSpeedMax: 100000,
-    rotationResistance: -40,
+    rotationResistance: friction,
     items: await getWheelItems(movies),
   })
 }
@@ -143,6 +147,12 @@ const initWheel = async (
   ;(document as ExtendedDocument).wheelInstance = extendedWheel
   wheel.onRest = onRest
   wheel.onCurrentIndexChange = makeARandomClickNoise
+
+  // Listen for friction changes
+  const handleFrictionChange = (event: CustomEvent) => {
+    wheel.rotationResistance = event.detail
+  }
+  window.addEventListener('wheelFrictionChange', handleFrictionChange as EventListener)
 }
 
 const onRest = ({ currentIndex }: WheelEvent) => {
