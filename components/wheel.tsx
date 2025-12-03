@@ -176,6 +176,21 @@ export const scrapeAndPlayTrailer = async (currentIndex: number) => {
     const response = await fetch(`/api/scrape-trailer?imdbId=${movie.id}`)
     const data = await response.json()
 
+    if (data.error) {
+      // Show error snackbar when no video is found
+      const event = new CustomEvent('showSnackbar', {
+        detail: {
+          message:
+            data.error === 'No video found'
+              ? 'No trailer found for this movie'
+              : 'Failed to load trailer',
+          severity: 'warning',
+        },
+      })
+      window.dispatchEvent(event)
+      return
+    }
+
     if (data.videoUrl) {
       const videoPlayer = document.getElementById(
         'trailer-player'
@@ -187,6 +202,13 @@ export const scrapeAndPlayTrailer = async (currentIndex: number) => {
         videoPlayer.style.display = 'block'
         videoPlayer.play().catch((err) => {
           console.error('Error playing video:', err)
+          const event = new CustomEvent('showSnackbar', {
+            detail: {
+              message: 'Failed to play video',
+              severity: 'error',
+            },
+          })
+          window.dispatchEvent(event)
         })
 
         videoPlayer.onended = () => {
@@ -196,6 +218,13 @@ export const scrapeAndPlayTrailer = async (currentIndex: number) => {
     }
   } catch (error) {
     console.error('Failed to fetch trailer:', error)
+    const event = new CustomEvent('showSnackbar', {
+      detail: {
+        message: 'Failed to fetch trailer',
+        severity: 'error',
+      },
+    })
+    window.dispatchEvent(event)
   }
 }
 

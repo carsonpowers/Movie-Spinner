@@ -655,12 +655,19 @@ export default function UI({
       setWatchedFilter(event.detail)
     }
 
+    // Listen for snackbar events from other components
+    const handleShowSnackbar = (event: CustomEvent) => {
+      const { message, severity } = event.detail
+      setSnackbar({ open: true, message, severity })
+    }
+
     window.addEventListener('viewChange', handleViewChange as EventListener)
     window.addEventListener('filterMovies', handleFilterMovies as EventListener)
     window.addEventListener(
       'watchedFilterChange',
       handleWatchedFilterChange as EventListener
     )
+    window.addEventListener('showSnackbar', handleShowSnackbar as EventListener)
     return () => {
       window.removeEventListener(
         'viewChange',
@@ -673,6 +680,10 @@ export default function UI({
       window.removeEventListener(
         'watchedFilterChange',
         handleWatchedFilterChange as EventListener
+      )
+      window.removeEventListener(
+        'showSnackbar',
+        handleShowSnackbar as EventListener
       )
     }
   }, [])

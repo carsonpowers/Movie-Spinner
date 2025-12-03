@@ -100,6 +100,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ videoUrl })
     }
 
+
     // Alternative: look for video tag src in the HTML
     const videoTagRegex = /<video[^>]*src="([^"]+)"/
     const videoTagMatch = html.match(videoTagRegex)
