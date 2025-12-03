@@ -207,9 +207,7 @@ const ListItem = ({
         if (!flipEnable) return
 
         // If another card is flipped, flip it back
-        if (currentFlippedCard && !flipHorizontally) {
-          currentFlippedCard()
-        }
+        if (currentFlippedCard && !flipHorizontally) currentFlippedCard()
 
         if (currentFlip) {
           currentFlip.pause()
@@ -225,11 +223,7 @@ const ListItem = ({
         toggleFlip(newFlipState)
 
         // Update the current flipped card reference
-        if (newFlipState) {
-          currentFlippedCard = () => toggleFlip(false)
-        } else {
-          currentFlippedCard = null
-        }
+        currentFlippedCard = newFlipState ? () => toggleFlip(false) : null
       }}
     >
       <Tilt
