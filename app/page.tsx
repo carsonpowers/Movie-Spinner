@@ -14,6 +14,7 @@ import LoadingSpinner from '@/components/loading-spinner'
 import AddMovieFab from '@/components/add-movie-fab'
 import SettingsFab from '@/components/settings-fab'
 import FilterFab from '@/components/filter-fab'
+import SpinFab from '@/components/spin-fab'
 
 // Enable dynamic rendering for auth
 export const dynamic = 'force-dynamic'
@@ -50,6 +51,7 @@ export default async function HomePage() {
         <FilterFab />
         <AddMovieFab userId={session?.user?.id} />
         <SettingsFab />
+        <SpinFab />
         <DownButton movieCount={movies.length} />
       </Suspense>
     </main>

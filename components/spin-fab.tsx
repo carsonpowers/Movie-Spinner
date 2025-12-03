@@ -1,0 +1,54 @@
+'use client'
+
+import { useState } from 'react'
+import Fab from '@mui/material/Fab'
+import Tooltip from '@mui/material/Tooltip'
+import PlayArrowIcon from '@mui/icons-material/PlayArrow'
+
+export default function SpinFab() {
+  const [isSpinning, setIsSpinning] = useState(false)
+
+  const handleSpin = () => {
+    if (isSpinning) return
+
+    const wheelInstance = (document as any).wheelInstance
+    if (!wheelInstance) return
+
+    setIsSpinning(true)
+
+    // Spin the wheel programmatically with random speed
+    const randomSpeed = Math.floor(Math.random() * 301) + 200 // Random between 200-500
+    wheelInstance.spin(randomSpeed, true, 0, 1)
+
+    // Reset spinning state after a delay
+    setTimeout(() => {
+      setIsSpinning(false)
+    }, 3000)
+  }
+
+  return (
+    <Tooltip title='Spin Wheel' arrow placement='left'>
+      <Fab
+        color='primary'
+        aria-label='spin wheel'
+        onClick={handleSpin}
+        disabled={isSpinning}
+        sx={{
+          position: 'fixed',
+          top: '5.5rem',
+          right: '1rem',
+          zIndex: 1000,
+          bgcolor: 'rgb(59 130 246 / 0.75)',
+          '&:hover': {
+            bgcolor: 'rgb(59 130 246 / 0.95)',
+          },
+          '&:disabled': {
+            bgcolor: 'rgb(107 114 128 / 0.5)',
+          },
+        }}
+      >
+        <PlayArrowIcon sx={{ color: 'white' }} />
+      </Fab>
+    </Tooltip>
+  )
+}
