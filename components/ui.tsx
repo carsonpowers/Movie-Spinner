@@ -168,6 +168,7 @@ const toggleWatched = async (event: React.MouseEvent<HTMLButtonElement>) => {
 }
 
 let currentFlip: HTMLAudioElement | null = null
+let currentFlippedCard: (() => void) | null = null
 
 const ListItem = ({
   children,
@@ -205,6 +206,11 @@ const ListItem = ({
       onClick={() => {
         if (!flipEnable) return
 
+        // If another card is flipped, flip it back
+        if (currentFlippedCard && !flipHorizontally) {
+          currentFlippedCard()
+        }
+
         if (currentFlip) {
           currentFlip.pause()
           currentFlip.currentTime = 0
@@ -214,7 +220,16 @@ const ListItem = ({
           currentFlip = flips[Math.round(Math.random() * 5)]
           currentFlip?.play()
         }
-        toggleFlip(!flipHorizontally)
+
+        const newFlipState = !flipHorizontally
+        toggleFlip(newFlipState)
+
+        // Update the current flipped card reference
+        if (newFlipState) {
+          currentFlippedCard = () => toggleFlip(false)
+        } else {
+          currentFlippedCard = null
+        }
       }}
     >
       <Tilt
