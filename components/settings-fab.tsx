@@ -16,8 +16,10 @@ import SettingsIcon from '@mui/icons-material/Settings'
 export default function SettingsFab() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [movieSize, setMovieSize] = useState(11) // Default 11rem
-  const [watchedFilter, setWatchedFilter] = useState<'all' | 'hideWatched' | 'onlyWatched'>('all')
-  const [wheelFriction, setWheelFriction] = useState(-40) // Default friction
+  const [watchedFilter, setWatchedFilter] = useState<
+    'all' | 'hideWatched' | 'onlyWatched'
+  >('all')
+  const [wheelFriction, setWheelFriction] = useState(40) // Default friction (absolute value)
 
   useEffect(() => {
     // Load saved movie size from localStorage
@@ -29,8 +31,14 @@ export default function SettingsFab() {
     }
 
     // Load watched filter preference
-    const savedFilter = localStorage.getItem('watchedFilter') as 'all' | 'hideWatched' | 'onlyWatched'
-    if (savedFilter && ['all', 'hideWatched', 'onlyWatched'].includes(savedFilter)) {
+    const savedFilter = localStorage.getItem('watchedFilter') as
+      | 'all'
+      | 'hideWatched'
+      | 'onlyWatched'
+    if (
+      savedFilter &&
+      ['all', 'hideWatched', 'onlyWatched'].includes(savedFilter)
+    ) {
       setWatchedFilter(savedFilter)
       window.dispatchEvent(
         new CustomEvent('watchedFilterChange', { detail: savedFilter })
@@ -40,10 +48,10 @@ export default function SettingsFab() {
     // Load wheel friction preference
     const savedFriction = localStorage.getItem('wheelFriction')
     if (savedFriction) {
-      const friction = parseFloat(savedFriction)
+      const friction = Math.abs(parseFloat(savedFriction))
       setWheelFriction(friction)
       window.dispatchEvent(
-        new CustomEvent('wheelFrictionChange', { detail: friction })
+        new CustomEvent('wheelFrictionChange', { detail: -friction })
       )
     }
   }, [])
@@ -85,12 +93,15 @@ export default function SettingsFab() {
     )
   }
 
-  const handleWheelFrictionChange = (_event: Event, value: number | number[]) => {
+  const handleWheelFrictionChange = (
+    _event: Event,
+    value: number | number[]
+  ) => {
     const friction = Array.isArray(value) ? value[0] : value
     setWheelFriction(friction)
-    localStorage.setItem('wheelFriction', friction.toString())
+    localStorage.setItem('wheelFriction', (-friction).toString())
     window.dispatchEvent(
-      new CustomEvent('wheelFrictionChange', { detail: friction })
+      new CustomEvent('wheelFrictionChange', { detail: -friction })
     )
   }
 
@@ -180,8 +191,8 @@ export default function SettingsFab() {
             <Slider
               value={wheelFriction}
               onChange={handleWheelFrictionChange}
-              min={-100}
-              max={-10}
+              min={5}
+              max={100}
               step={5}
               valueLabelDisplay='auto'
               sx={{

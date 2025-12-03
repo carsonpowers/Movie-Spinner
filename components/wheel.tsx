@@ -152,7 +152,10 @@ const initWheel = async (
   const handleFrictionChange = (event: CustomEvent) => {
     wheel.rotationResistance = event.detail
   }
-  window.addEventListener('wheelFrictionChange', handleFrictionChange as EventListener)
+  window.addEventListener(
+    'wheelFrictionChange',
+    handleFrictionChange as EventListener
+  )
 }
 
 const onRest = ({ currentIndex }: WheelEvent) => {
