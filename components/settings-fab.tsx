@@ -121,12 +121,12 @@ export default function SettingsFab() {
             '&:hover': {
               bgcolor: 'rgb(107 114 128 / 0.95)',
               '& svg': {
-                transform: 'rotate(45deg) scale(1.1)',
+                transform: 'rotate(60deg) scale(1.1)',
                 transition: 'transform 0.2s ease-in-out',
               },
             },
             '& svg': {
-              transition: 'transform 0.2s ease-in-out',
+              transition: 'none',
             },
           }}
         >
