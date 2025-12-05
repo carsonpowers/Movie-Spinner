@@ -23,6 +23,20 @@ interface Movie {
   imdbID?: string
 }
 
+interface OMDBSearchResult {
+  Title: string
+  Year: string
+  imdbID: string
+  Type: string
+  Poster: string
+}
+
+interface OMDBSearchResponse {
+  Search: OMDBSearchResult[]
+  totalResults: string
+  Response: string
+}
+
 interface SnackbarState {
   open: boolean
   message: string
@@ -43,22 +57,20 @@ function SlideRightTransition(
 
 const fetchMovieData = async ({
   title,
-  search = false,
 }: {
   title: string
-  search?: boolean
-}) => {
+}): Promise<OMDBSearchResponse | { Search: [] }> => {
   const response = await fetch('/api/fetchMovieData', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ Title: title, search }),
+    body: JSON.stringify({ Title: title }),
   })
   if (!response.ok) {
     // 404 is expected when no movies are found - return empty result
     if (response.status === 404) {
-      return search ? { Search: [] } : null
+      return { Search: [] }
     }
     throw new Error(`Failed to fetch movie data: ${response.status}`)
   }
@@ -128,9 +140,9 @@ export default function AddMovieFab({ userId }: AddMovieFabProps) {
 
     setLoading(true)
     try {
-      const data = await fetchMovieData({ title: value, search: true })
+      const data = await fetchMovieData({ title: value })
       const movieData =
-        data?.Search?.map?.((movie: any) => ({
+        data?.Search?.map?.((movie: OMDBSearchResult) => ({
           title: movie.Title,
           year: movie.Year,
           poster: movie.Poster,

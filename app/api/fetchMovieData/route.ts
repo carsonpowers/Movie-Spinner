@@ -14,11 +14,11 @@ const CACHE_DURATION = 60 * 60 * 24
 
 export async function POST(request: NextRequest) {
   try {
-    const { Title, search } = await request.json()
+    const { Title } = await request.json()
 
-    if (!Title && !search) {
+    if (!Title) {
       return NextResponse.json(
-        { error: 'Movie title or search query is required' },
+        { error: 'Movie title is required' },
         { status: 400 }
       )
     }
@@ -34,9 +34,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // If search is true, use the search endpoint (s=), otherwise use title lookup (t=)
-    const searchParam = search ? `s=${encodeURIComponent(Title)}` : `t=${encodeURIComponent(Title)}`
-    const url = `https://www.omdbapi.com/?apikey=${apiKey}&${searchParam}`
+    // Use the search endpoint to find movies by title
+    const url = `https://www.omdbapi.com/?apikey=${apiKey}&s=${encodeURIComponent(Title)}`
     
     const response = await fetch(url, {
       method: 'GET',
@@ -61,31 +60,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // If it's a search query, return the search results directly
-    if (search) {
-      return NextResponse.json(data, {
-        status: 200,
-        headers: {
-          'Cache-Control': `public, s-maxage=${CACHE_DURATION}, stale-while-revalidate=${CACHE_DURATION * 2}`,
-        },
-      })
-    }
-
-    // Transform OMDB response to our format for single movie lookup
-    const movieData = {
-      title: data.Title,
-      year: data.Year,
-      genre: data.Genre,
-      rating: data.imdbRating,
-      poster: data.Poster !== 'N/A' ? data.Poster : undefined,
-      imdbId: data.imdbID,
-      plot: data.Plot,
-      director: data.Director,
-      actors: data.Actors,
-      runtime: data.Runtime,
-    }
-
-    return NextResponse.json(movieData, {
+    // Return the search results directly
+    return NextResponse.json(data, {
       status: 200,
       headers: {
         'Cache-Control': `public, s-maxage=${CACHE_DURATION}, stale-while-revalidate=${CACHE_DURATION * 2}`,
