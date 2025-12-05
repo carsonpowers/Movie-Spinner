@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Fab from '@mui/material/Fab'
 import Tooltip from '@mui/material/Tooltip'
-import PlayArrowIcon from '@mui/icons-material/PlayArrow'
+import LoopIcon from '@mui/icons-material/Loop'
 
 export default function SpinFab() {
   const [isSpinning, setIsSpinning] = useState(false)
@@ -14,10 +14,16 @@ export default function SpinFab() {
       setIsWheelVisible(event.detail === 'wheel')
     }
 
-    window.addEventListener('wheelVisibilityChange', handleWheelVisibility as EventListener)
-    
+    window.addEventListener(
+      'wheelVisibilityChange',
+      handleWheelVisibility as EventListener
+    )
+
     return () => {
-      window.removeEventListener('wheelVisibilityChange', handleWheelVisibility as EventListener)
+      window.removeEventListener(
+        'wheelVisibilityChange',
+        handleWheelVisibility as EventListener
+      )
     }
   }, [])
 
@@ -56,13 +62,20 @@ export default function SpinFab() {
           bgcolor: 'rgb(59 130 246 / 0.75)',
           '&:hover': {
             bgcolor: 'rgb(59 130 246 / 0.95)',
+            '& svg': {
+              transform: 'scale(1.1)',
+              transition: 'transform 0.1s ease-in-out',
+            },
           },
           '&:disabled': {
             bgcolor: 'rgb(107 114 128 / 0.5)',
           },
+          '& svg': {
+            transition: 'transform 0.1s ease-in-out',
+          },
         }}
       >
-        <PlayArrowIcon sx={{ color: 'white' }} />
+        <LoopIcon sx={{ color: 'white' }} />
       </Fab>
     </Tooltip>
   )

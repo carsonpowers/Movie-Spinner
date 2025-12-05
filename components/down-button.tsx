@@ -58,12 +58,19 @@ const DownButton = ({ movieCount }: DownButtonProps) => {
     }
 
     window.addEventListener('viewModeSync', handleViewModeSync as EventListener)
-    
+
     // Dispatch initial wheel visibility state
-    window.dispatchEvent(new CustomEvent('wheelVisibilityChange', { 
-      detail: savedView === 'table' ? 'table' : savedView === 'grid' ? 'grid' : 'wheel' 
-    }))
-    
+    window.dispatchEvent(
+      new CustomEvent('wheelVisibilityChange', {
+        detail:
+          savedView === 'table'
+            ? 'table'
+            : savedView === 'grid'
+            ? 'grid'
+            : 'wheel',
+      })
+    )
+
     return () => {
       window.removeEventListener(
         'viewModeSync',
@@ -107,7 +114,9 @@ const DownButton = ({ movieCount }: DownButtonProps) => {
       const viewMode = 'grid'
       localStorage.setItem('movieView', viewMode)
       window.dispatchEvent(new CustomEvent('viewChange', { detail: viewMode }))
-      window.dispatchEvent(new CustomEvent('wheelVisibilityChange', { detail: viewMode }))
+      window.dispatchEvent(
+        new CustomEvent('wheelVisibilityChange', { detail: viewMode })
+      )
       return
     }
 
@@ -116,16 +125,19 @@ const DownButton = ({ movieCount }: DownButtonProps) => {
       const viewMode = newValue === 2 ? 'table' : 'grid'
       localStorage.setItem('movieView', viewMode)
       window.dispatchEvent(new CustomEvent('viewChange', { detail: viewMode }))
-      window.dispatchEvent(new CustomEvent('wheelVisibilityChange', { detail: viewMode }))
+      window.dispatchEvent(
+        new CustomEvent('wheelVisibilityChange', { detail: viewMode })
+      )
     }
 
     setValue(newValue)
 
     if (newValue === 0) {
       showWheel()
-      window.dispatchEvent(new CustomEvent('wheelVisibilityChange', { detail: 'wheel' }))
-    }
-    else hideWheel()
+      window.dispatchEvent(
+        new CustomEvent('wheelVisibilityChange', { detail: 'wheel' })
+      )
+    } else hideWheel()
   }
 
   return (
