@@ -37,12 +37,10 @@ export default function SpinFab() {
 
     // Spin the wheel programmatically with random speed
     const randomSpeed = Math.floor(Math.random() * 301) + 200 // Random between 200-500
-    wheelInstance.spin(randomSpeed, true, 0, 1)
+    wheelInstance.spin(-randomSpeed)
 
     // Reset spinning state after a delay
-    setTimeout(() => {
-      setIsSpinning(false)
-    }, 3000)
+    setIsSpinning(false)
   }
 
   if (!isWheelVisible) return null
@@ -63,8 +61,8 @@ export default function SpinFab() {
           '&:hover': {
             bgcolor: 'rgb(59 130 246 / 0.95)',
             '& svg': {
-              transform: 'scale(1.1) rotate(360deg)',
-              transition: 'transform 0.3s ease-in-out',
+              transform: 'scale(1.1) rotate(-360deg)',
+              transition: 'transform 0.6s ease-in-out',
             },
           },
           '&:disabled': {
