@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Fab from '@mui/material/Fab'
 import Menu from '@mui/material/Menu'
@@ -117,6 +117,11 @@ export default function AddMovieFab({ userId }: AddMovieFabProps) {
     severity: 'error',
   })
 
+  // Cache for storing search results
+  const searchCache = useRef<Map<string, Movie[]>>(new Map())
+  // Debounce timer
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null)
+
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget)
   }
@@ -127,41 +132,61 @@ export default function AddMovieFab({ userId }: AddMovieFabProps) {
     setOptions([])
   }
 
-  const handleInputChange = async (
-    _event: React.SyntheticEvent,
-    value: string
-  ) => {
-    setInputValue(value)
+  const handleInputChange = useCallback(
+    async (_event: React.SyntheticEvent, value: string) => {
+      setInputValue(value)
 
-    if (value.length < 1) {
-      setOptions([])
-      return
-    }
+      // Clear existing debounce timer
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current)
+      }
 
-    setLoading(true)
-    try {
-      const data = await fetchMovieData({ title: value })
-      const movieData =
-        data?.Search?.map?.((movie: OMDBSearchResult) => ({
-          title: movie.Title,
-          year: movie.Year,
-          poster: movie.Poster,
-          imdbID: movie.imdbID,
-        })) || []
+      if (value.length < 1) {
+        setOptions([])
+        setLoading(false)
+        return
+      }
 
-      setOptions(movieData)
-    } catch (error) {
-      console.error('Error fetching movie data:', error)
-      setSnackbar({
-        open: true,
-        message: 'Failed to fetch movie data. Please try again.',
-        severity: 'error',
-      })
-      setOptions([])
-    } finally {
-      setLoading(false)
-    }
-  }
+      // Check cache first
+      const cachedResults = searchCache.current.get(value.toLowerCase())
+      if (cachedResults) {
+        setOptions(cachedResults)
+        return
+      }
+
+      // Set loading state immediately for better UX
+      setLoading(true)
+
+      // Debounce the API call
+      debounceTimer.current = setTimeout(async () => {
+        try {
+          const data = await fetchMovieData({ title: value })
+          const movieData =
+            data?.Search?.map?.((movie: OMDBSearchResult) => ({
+              title: movie.Title,
+              year: movie.Year,
+              poster: movie.Poster,
+              imdbID: movie.imdbID,
+            })) || []
+
+          // Store in cache
+          searchCache.current.set(value.toLowerCase(), movieData)
+          setOptions(movieData)
+        } catch (error) {
+          console.error('Error fetching movie data:', error)
+          setSnackbar({
+            open: true,
+            message: 'Failed to fetch movie data. Please try again.',
+            severity: 'error',
+          })
+          setOptions([])
+        } finally {
+          setLoading(false)
+        }
+      }, 300) // 300ms debounce delay
+    },
+    []
+  )
 
   const handleChange = async (
     _event: React.SyntheticEvent,
