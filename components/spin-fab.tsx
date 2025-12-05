@@ -63,15 +63,15 @@ export default function SpinFab() {
           '&:hover': {
             bgcolor: 'rgb(59 130 246 / 0.95)',
             '& svg': {
-              transform: 'scale(1.1)',
-              transition: 'transform 0.1s ease-in-out',
+              transform: 'scale(1.1) rotate(360deg)',
+              transition: 'transform 0.3s ease-in-out',
             },
           },
           '&:disabled': {
             bgcolor: 'rgb(107 114 128 / 0.5)',
           },
           '& svg': {
-            transition: 'transform 0.1s ease-in-out',
+            transition: 'none',
           },
         }}
       >
