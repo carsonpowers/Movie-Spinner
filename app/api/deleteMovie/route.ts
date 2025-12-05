@@ -33,6 +33,13 @@ export async function DELETE(request: NextRequest) {
     }
 
     const userId = session.user.id
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'User ID not found' },
+        { status: 400 }
+      )
+    }
+
     const userMovieRef = adminDb
       .collection('users')
       .doc(userId)

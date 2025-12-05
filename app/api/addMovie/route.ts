@@ -33,6 +33,13 @@ export async function POST(request: NextRequest) {
     }
 
     const userId = session.user.id
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'User ID not found' },
+        { status: 400 }
+      )
+    }
+
     const moviesRef = adminDb.collection('movies')
     const movieDocRef = moviesRef.doc(docId)
     const userMovieRef = adminDb

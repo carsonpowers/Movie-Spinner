@@ -87,56 +87,6 @@ const fetchMovieData = async ({
   }
 }
 
-const removeMovie = async (event: React.MouseEvent<HTMLButtonElement>) => {
-  event.stopPropagation()
-  const target = event.currentTarget
-  const Menu = target.closest('ul')
-  const LI = target.closest('li')
-  const id = LI?.getAttribute('data-id')
-
-  if (!id) {
-    console.error("Couldn't find movie id")
-    return
-  }
-
-  try {
-    const response = await fetch(`/api/deleteMovie?id=${id}`, {
-      method: 'DELETE',
-    })
-
-    if (!response.ok) {
-      throw new Error('Failed to delete movie')
-    }
-
-    // Animate removal
-    if (Menu && LI) {
-      Menu.animate(
-        [
-          { height: `${Menu.offsetHeight}px` },
-          { height: `${Menu.offsetHeight - (LI.offsetHeight + 8)}px` },
-        ],
-        {
-          duration: 500,
-          easing: 'ease-out',
-          fill: 'forwards',
-        }
-      )
-
-      const animation = LI.animate([{ opacity: 1 }, { opacity: 0 }], {
-        duration: 500,
-        easing: 'ease-out',
-        fill: 'forwards',
-      })
-
-      animation.onfinish = () => {
-        _refresh()
-      }
-    }
-  } catch (error) {
-    console.error('Error deleting movie:', error)
-  }
-}
-
 const toggleWatched = async (event: React.MouseEvent<HTMLButtonElement>) => {
   event.stopPropagation()
   const target = event.currentTarget
