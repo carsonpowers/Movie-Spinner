@@ -4,9 +4,11 @@
  */
 
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback, useMemo, memo } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
+import { MovieProvider, useMovieContext } from '@/contexts/MovieContext'
+import { useMovieActions } from '@/hooks/useMovieActions'
 import Tilt from 'react-parallax-tilt'
 import Fab from '@mui/material/Fab'
 import VisibilityIcon from '@mui/icons-material/Visibility'
@@ -55,12 +57,6 @@ function SlideRightTransition(
   return <Slide {...props} direction='right' />
 }
 
-let _refresh: () => void
-let _showSnackbar: (
-  message: string,
-  severity: SnackbarState['severity']
-) => void
-
 const fetchMovieData = async ({
   title,
   search = false,
@@ -84,36 +80,6 @@ const fetchMovieData = async ({
   } catch (error) {
     console.error('Error fetching movie data:', error)
     return null
-  }
-}
-
-const toggleWatched = async (event: React.MouseEvent<HTMLButtonElement>) => {
-  event.stopPropagation()
-  const target = event.currentTarget
-  const LI = target.closest('li')
-  const id = LI?.getAttribute('data-id')
-
-  if (!id) {
-    console.error("Couldn't find movie id")
-    return
-  }
-
-  try {
-    const response = await fetch('/api/toggleWatched', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ movieId: id }),
-    })
-
-    if (!response.ok) {
-      throw new Error('Failed to toggle watched status')
-    }
-
-    _refresh()
-  } catch (error) {
-    console.error('Error toggling watched status:', error)
   }
 }
 
@@ -216,56 +182,46 @@ const ListItem = ({
   )
 }
 
-const MovieListItem = (movie: Movie) => {
+const MovieListItem = memo((movie: Movie) => {
   const { title, year, id, poster, watched } = movie
   const [optimisticWatched, setOptimisticWatched] = useState(watched)
   const [isDeleting, setIsDeleting] = useState(false)
+  const { toggleWatched, deleteMovie, isLoading } = useMovieActions()
 
   useEffect(() => {
     setOptimisticWatched(watched)
   }, [watched])
 
-  const handleToggleWatched = async (
-    event: React.MouseEvent<HTMLButtonElement>
-  ) => {
-    setOptimisticWatched(!optimisticWatched)
-    await toggleWatched(event)
-  }
+  const handleToggleWatched = useCallback(
+    async (event: React.MouseEvent<HTMLButtonElement>) => {
+      event.stopPropagation()
+      if (!id) return
 
-  const handleRemoveMovie = async (
-    event: React.MouseEvent<HTMLButtonElement>
-  ) => {
-    event.stopPropagation()
+      setOptimisticWatched(!optimisticWatched)
+      const success = await toggleWatched(id)
 
-    // Optimistically mark as deleting for UI
-    setIsDeleting(true)
-
-    // Call the API
-    try {
-      const response = await fetch(`/api/deleteMovie?id=${id}`, {
-        method: 'DELETE',
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to delete movie')
+      // Revert on failure
+      if (!success) {
+        setOptimisticWatched(optimisticWatched)
       }
+    },
+    [id, optimisticWatched, toggleWatched]
+  )
 
-      // Show success snackbar
-      _showSnackbar(`${title} removed successfully`, 'success')
+  const handleRemoveMovie = useCallback(
+    async (event: React.MouseEvent<HTMLButtonElement>) => {
+      event.stopPropagation()
+      if (!id) return
 
-      // Wait for animation to complete before refreshing
-      setTimeout(() => {
-        _refresh()
-      }, 300)
-    } catch (error) {
-      console.error('Error deleting movie:', error)
-      // Show error snackbar
-      _showSnackbar('Failed to delete movie. Please try again.', 'error')
-      // If API fails, restore UI and refresh
-      setIsDeleting(false)
-      _refresh()
-    }
-  }
+      setIsDeleting(true)
+      const success = await deleteMovie(id, title)
+
+      if (!success) {
+        setIsDeleting(false)
+      }
+    },
+    [id, title, deleteMovie]
+  )
 
   // Don't render if being deleted
   if (isDeleting) {
@@ -396,7 +352,9 @@ const MovieListItem = (movie: Movie) => {
       )}
     </ListItem>
   )
-}
+})
+
+MovieListItem.displayName = 'MovieListItem'
 
 const MovieList = ({ children }: { children: React.ReactNode }) => (
   <ul
@@ -407,54 +365,30 @@ const MovieList = ({ children }: { children: React.ReactNode }) => (
   </ul>
 )
 
-const MovieTableRow = (movie: Movie) => {
+const MovieTableRow = memo((movie: Movie) => {
   const { title, year, id, poster, watched, imdbID, imdbId } = movie
   const [optimisticWatched, setOptimisticWatched] = useState(watched)
+  const { toggleWatched, deleteMovie } = useMovieActions()
 
   useEffect(() => {
     setOptimisticWatched(watched)
   }, [watched])
 
-  const handleToggleWatched = async () => {
+  const handleToggleWatched = useCallback(async () => {
+    if (!id) return
+
     setOptimisticWatched(!optimisticWatched)
-    try {
-      const response = await fetch('/api/toggleWatched', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ movieId: id }),
-      })
+    const success = await toggleWatched(id)
 
-      if (!response.ok) {
-        throw new Error('Failed to toggle watched status')
-      }
-
-      _refresh()
-    } catch (error) {
-      console.error('Error toggling watched status:', error)
-      // Revert on error
+    if (!success) {
       setOptimisticWatched(watched)
     }
-  }
+  }, [id, optimisticWatched, watched, toggleWatched])
 
-  const handleDelete = async () => {
-    try {
-      const response = await fetch(`/api/deleteMovie?id=${id}`, {
-        method: 'DELETE',
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to delete movie')
-      }
-
-      _showSnackbar(`${title} removed successfully`, 'success')
-      _refresh()
-    } catch (error) {
-      console.error('Error deleting movie:', error)
-      _showSnackbar('Failed to delete movie. Please try again.', 'error')
-    }
-  }
+  const handleDelete = useCallback(async () => {
+    if (!id) return
+    await deleteMovie(id, title)
+  }, [id, title, deleteMovie])
 
   const movieImdbId = imdbID || imdbId
 
@@ -556,16 +490,11 @@ const MovieTableRow = (movie: Movie) => {
       </TableCell>
     </TableRow>
   )
-}
+})
 
-export default function UI({
-  movies,
-  userId,
-}: {
-  movies: Movie[]
-  userId?: string
-}) {
-  const router = useRouter()
+MovieTableRow.displayName = 'MovieTableRow'
+
+function UIContent({ movies, userId }: { movies: Movie[]; userId?: string }) {
   const [snackbar, setSnackbar] = useState<SnackbarState>({
     open: false,
     message: '',
@@ -577,48 +506,44 @@ export default function UI({
     'all' | 'hideWatched' | 'onlyWatched'
   >('all')
 
-  // Filter movies based on title, year, and watched status
-  const filteredMovies = movies.filter((movie) => {
-    // Filter by watched status
-    if (watchedFilter === 'hideWatched' && movie.watched) return false
-    if (watchedFilter === 'onlyWatched' && !movie.watched) return false
+  // Memoize event handlers to prevent recreation
+  const handleViewChange = useCallback((event: CustomEvent) => {
+    setViewMode(event.detail)
+  }, [])
 
-    // Filter by search text
-    if (!filterText) return true
-    const searchText = filterText.toLowerCase()
-    const titleMatch = movie.title.toLowerCase().includes(searchText)
-    const yearMatch = movie.year?.includes(searchText)
-    return titleMatch || yearMatch
-  })
+  const handleFilterMovies = useCallback((event: CustomEvent) => {
+    setFilterText(event.detail)
+  }, [])
 
-  _refresh = router.refresh
-  _showSnackbar = (message: string, severity: SnackbarState['severity']) => {
+  const handleWatchedFilterChange = useCallback((event: CustomEvent) => {
+    setWatchedFilter(event.detail)
+  }, [])
+
+  const handleShowSnackbar = useCallback((event: CustomEvent) => {
+    const { message, severity } = event.detail
     setSnackbar({ open: true, message, severity })
-  }
+  }, [])
+
+  // Filter movies based on title, year, and watched status
+  const filteredMovies = useMemo(
+    () =>
+      movies.filter((movie) => {
+        // Filter by watched status
+        if (watchedFilter === 'hideWatched' && movie.watched) return false
+        if (watchedFilter === 'onlyWatched' && !movie.watched) return false
+
+        // Filter by search text
+        if (!filterText) return true
+        const searchText = filterText.toLowerCase()
+        const titleMatch = movie.title.toLowerCase().includes(searchText)
+        const yearMatch = movie.year?.includes(searchText)
+        return titleMatch || yearMatch
+      }),
+    [movies, watchedFilter, filterText]
+  )
 
   useEffect(() => {
     ;(document as any).flips = [...document.querySelectorAll('#flips > audio')]
-
-    // Listen for view changes from settings
-    const handleViewChange = (event: CustomEvent) => {
-      setViewMode(event.detail)
-    }
-
-    // Listen for filter changes
-    const handleFilterMovies = (event: CustomEvent) => {
-      setFilterText(event.detail)
-    }
-
-    // Listen for watched filter changes
-    const handleWatchedFilterChange = (event: CustomEvent) => {
-      setWatchedFilter(event.detail)
-    }
-
-    // Listen for snackbar events from other components
-    const handleShowSnackbar = (event: CustomEvent) => {
-      const { message, severity } = event.detail
-      setSnackbar({ open: true, message, severity })
-    }
 
     window.addEventListener('viewChange', handleViewChange as EventListener)
     window.addEventListener('filterMovies', handleFilterMovies as EventListener)
@@ -627,6 +552,7 @@ export default function UI({
       handleWatchedFilterChange as EventListener
     )
     window.addEventListener('showSnackbar', handleShowSnackbar as EventListener)
+
     return () => {
       window.removeEventListener(
         'viewChange',
@@ -645,7 +571,12 @@ export default function UI({
         handleShowSnackbar as EventListener
       )
     }
-  }, [])
+  }, [
+    handleViewChange,
+    handleFilterMovies,
+    handleWatchedFilterChange,
+    handleShowSnackbar,
+  ])
 
   // Sync viewMode changes back to settings
   useEffect(() => {
@@ -777,5 +708,32 @@ export default function UI({
       </Snackbar>
       <VideoPlayer />
     </>
+  )
+}
+
+export default function UI({
+  movies,
+  userId,
+}: {
+  movies: Movie[]
+  userId?: string
+}) {
+  const [snackbar, setSnackbar] = useState<SnackbarState>({
+    open: false,
+    message: '',
+    severity: 'success',
+  })
+
+  const handleSnackbar = useCallback(
+    (message: string, severity: SnackbarState['severity']) => {
+      setSnackbar({ open: true, message, severity })
+    },
+    []
+  )
+
+  return (
+    <MovieProvider onSnackbar={handleSnackbar}>
+      <UIContent movies={movies} userId={userId} />
+    </MovieProvider>
   )
 }

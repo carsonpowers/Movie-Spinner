@@ -11,6 +11,7 @@ import UI from '@/components/ui'
 import Wheel from '@/components/wheel'
 import DownButton from '@/components/down-button'
 import LoadingSpinner from '@/components/loading-spinner'
+import MovieListSkeleton from '@/components/movie-list-skeleton'
 import AddMovieFab from '@/components/add-movie-fab'
 import SettingsFab from '@/components/settings-fab'
 import FilterFab from '@/components/filter-fab'
@@ -46,7 +47,11 @@ export default async function HomePage() {
     <main className='min-h-screen bg-gradient-to-b from-gray-900 to-black'>
       <Suspense fallback={<LoadingSpinner />}>
         <UserPanel user={session?.user} />
+      </Suspense>
+      <Suspense fallback={<MovieListSkeleton count={12} />}>
         <UI movies={movies} userId={session?.user?.id} />
+      </Suspense>
+      <Suspense fallback={null}>
         <Wheel movies={movies} />
         <FilterFab />
         <AddMovieFab userId={session?.user?.id} />
