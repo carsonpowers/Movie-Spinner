@@ -1,12 +1,25 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Fab from '@mui/material/Fab'
 import Tooltip from '@mui/material/Tooltip'
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 
 export default function SpinFab() {
   const [isSpinning, setIsSpinning] = useState(false)
+  const [isWheelVisible, setIsWheelVisible] = useState(false)
+
+  useEffect(() => {
+    const handleWheelVisibility = (event: CustomEvent) => {
+      setIsWheelVisible(event.detail === 'wheel')
+    }
+
+    window.addEventListener('wheelVisibilityChange', handleWheelVisibility as EventListener)
+    
+    return () => {
+      window.removeEventListener('wheelVisibilityChange', handleWheelVisibility as EventListener)
+    }
+  }, [])
 
   const handleSpin = () => {
     if (isSpinning) return
@@ -25,6 +38,8 @@ export default function SpinFab() {
       setIsSpinning(false)
     }, 3000)
   }
+
+  if (!isWheelVisible) return null
 
   return (
     <Tooltip title='Spin Wheel' arrow placement='left'>
