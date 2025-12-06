@@ -43,6 +43,7 @@ const DownButton = ({ movieCount }: DownButtonProps) => {
   const [value, setValue] = useState(1) // 0: wheel, 1: grid, 2: table
   const [snackbars, setSnackbars] = useState<SnackbarItem[]>([])
   const [nextId, setNextId] = useState(0)
+  const [isNear, setIsNear] = useState(false)
 
   useEffect(() => {
     // Load saved view preference
@@ -142,32 +143,36 @@ const DownButton = ({ movieCount }: DownButtonProps) => {
 
   return (
     <>
-      <Paper
-        sx={{
-          position: 'fixed',
-          bottom: 0,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: 'auto',
-          zIndex: 30,
-        }}
-        elevation={3}
+      <div
+        className='fixed bottom-0 left-1/2 z-30 -translate-x-1/2 p-20 pb-0'
+        onMouseEnter={() => setIsNear(true)}
+        onMouseLeave={() => setIsNear(false)}
       >
-        <BottomNavigation value={value} onChange={handleChange}>
-          <Tooltip title='Wheel' arrow placement='top'>
-            <BottomNavigationAction icon={<AlbumIcon />} aria-label='Wheel' />
-          </Tooltip>
-          <Tooltip title='List' arrow placement='top'>
-            <BottomNavigationAction icon={<ListIcon />} aria-label='List' />
-          </Tooltip>
-          <Tooltip title='Table' arrow placement='top'>
-            <BottomNavigationAction
-              icon={<TableChartIcon />}
-              aria-label='Table'
-            />
-          </Tooltip>
-        </BottomNavigation>
-      </Paper>
+        <Paper
+          sx={{
+            width: 'auto',
+            transition: 'transform 0.3s ease, opacity 0.3s ease',
+            transform: isNear ? 'translateY(0)' : 'translateY(50%)',
+            opacity: isNear ? 1 : 0.5,
+          }}
+          elevation={3}
+        >
+          <BottomNavigation value={value} onChange={handleChange}>
+            <Tooltip title='Wheel' arrow placement='top'>
+              <BottomNavigationAction icon={<AlbumIcon />} aria-label='Wheel' />
+            </Tooltip>
+            <Tooltip title='List' arrow placement='top'>
+              <BottomNavigationAction icon={<ListIcon />} aria-label='List' />
+            </Tooltip>
+            <Tooltip title='Table' arrow placement='top'>
+              <BottomNavigationAction
+                icon={<TableChartIcon />}
+                aria-label='Table'
+              />
+            </Tooltip>
+          </BottomNavigation>
+        </Paper>
+      </div>
       {snackbars.map((snackbar, index) => (
         <Snackbar
           key={snackbar.id}
