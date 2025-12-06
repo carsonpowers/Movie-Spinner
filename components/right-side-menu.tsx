@@ -18,6 +18,7 @@ interface RightSideMenuProps {
 
 export default function RightSideMenu({ userId }: RightSideMenuProps) {
   const [isWheelVisible, setIsWheelVisible] = useState(false)
+  const [isNear, setIsNear] = useState(false)
 
   useEffect(() => {
     const handleWheelVisibility = (event: CustomEvent) => {
@@ -38,21 +39,33 @@ export default function RightSideMenu({ userId }: RightSideMenuProps) {
   }, [])
 
   return (
-    <FabList>
-      <FabListItem>
-        <SettingsFab />
-      </FabListItem>
-      {isWheelVisible && (
+    <div
+      className='fixed top-0 right-0 z-50 pt-4 pr-4 pb-10 pl-10'
+      onMouseEnter={() => setIsNear(true)}
+      onMouseLeave={() => setIsNear(false)}
+    >
+      <FabList
+        style={{
+          transition: 'transform 0.3s ease, opacity 0.3s ease',
+          transform: isNear ? 'translateX(0)' : 'translateX(50%)',
+          opacity: isNear ? 1 : 0.5,
+        }}
+      >
         <FabListItem>
-          <SpinFab />
+          <SettingsFab />
         </FabListItem>
-      )}
-      <FabListItem>
-        <FilterFab />
-      </FabListItem>
-      <FabListItem>
-        <AddMovieFab userId={userId} />
-      </FabListItem>
-    </FabList>
+        {isWheelVisible && (
+          <FabListItem>
+            <SpinFab />
+          </FabListItem>
+        )}
+        <FabListItem>
+          <FilterFab />
+        </FabListItem>
+        <FabListItem>
+          <AddMovieFab userId={userId} />
+        </FabListItem>
+      </FabList>
+    </div>
   )
 }

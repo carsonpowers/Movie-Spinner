@@ -9,22 +9,22 @@ import { ReactNode } from 'react'
 
 interface FabListProps {
   children: ReactNode
+  style?: React.CSSProperties
+  className?: string
 }
 
-export default function FabList({ children }: FabListProps) {
+export default function FabList({ children, style, className }: FabListProps) {
   return (
     <ul
+      className={className}
       style={{
-        position: 'fixed',
-        top: '1rem',
-        right: '1rem',
-        zIndex: 1000,
         display: 'flex',
         flexDirection: 'column',
         gap: '1rem',
         listStyle: 'none',
         margin: 0,
         padding: 0,
+        ...style,
       }}
     >
       {children}
