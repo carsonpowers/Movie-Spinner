@@ -159,15 +159,42 @@ const DownButton = ({ movieCount }: DownButtonProps) => {
         >
           <BottomNavigation value={value} onChange={handleChange}>
             <Tooltip title='Wheel' arrow placement='top'>
-              <BottomNavigationAction icon={<AlbumIcon />} aria-label='Wheel' />
+              <BottomNavigationAction
+                icon={<AlbumIcon />}
+                aria-label='Wheel'
+                sx={{
+                  transition: 'transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                  '&:active': {
+                    transform: 'translateY(6px)',
+                    transition: 'transform 0.1s',
+                  },
+                }}
+              />
             </Tooltip>
             <Tooltip title='List' arrow placement='top'>
-              <BottomNavigationAction icon={<ListIcon />} aria-label='List' />
+              <BottomNavigationAction
+                icon={<ListIcon />}
+                aria-label='List'
+                sx={{
+                  transition: 'transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                  '&:active': {
+                    transform: 'translateY(6px)',
+                    transition: 'transform 0.1s',
+                  },
+                }}
+              />
             </Tooltip>
             <Tooltip title='Table' arrow placement='top'>
               <BottomNavigationAction
                 icon={<TableChartIcon />}
                 aria-label='Table'
+                sx={{
+                  transition: 'transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                  '&:active': {
+                    transform: 'translateY(6px)',
+                    transition: 'transform 0.1s',
+                  },
+                }}
               />
             </Tooltip>
           </BottomNavigation>
