@@ -239,12 +239,12 @@ export default function AddMovieFab({ userId }: AddMovieFabProps) {
           sx={{
             '&:hover': {
               '& svg': {
-                transform: 'scale(1.1)',
-                transition: 'transform 0.1s ease-in-out',
+                transform: 'rotate(90deg) scale(1.1)',
+                transition: 'transform 0.2s ease-in-out',
               },
             },
             '& svg': {
-              transition: 'transform 0.1s ease-in-out',
+              transition: 'none',
             },
           }}
         >
