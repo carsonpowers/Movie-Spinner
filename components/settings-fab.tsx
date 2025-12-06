@@ -16,6 +16,7 @@ import SettingsIcon from '@mui/icons-material/Settings'
 export default function SettingsFab() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [movieSize, setMovieSize] = useState(11) // Default 11rem
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid')
   const [watchedFilter, setWatchedFilter] = useState<
     'all' | 'hideWatched' | 'onlyWatched'
   >('all')
@@ -53,6 +54,16 @@ export default function SettingsFab() {
       window.dispatchEvent(
         new CustomEvent('wheelFrictionChange', { detail: -friction })
       )
+    }
+
+    // Listen for view mode changes
+    const handleViewModeSync = (event: CustomEvent) => {
+      setViewMode(event.detail)
+    }
+
+    window.addEventListener('viewModeSync', handleViewModeSync as EventListener)
+    return () => {
+      window.removeEventListener('viewModeSync', handleViewModeSync as EventListener)
     }
   }, [])
 
@@ -155,32 +166,36 @@ export default function SettingsFab() {
         }}
       >
         <Box sx={{ px: 2, py: 1 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Typography
-              variant='body2'
-              sx={{ minWidth: '2.5rem', fontWeight: 600 }}
-            >
-              Size
-            </Typography>
-            <Slider
-              value={movieSize}
-              onChange={handleMovieSizeChange}
-              min={8.5}
-              max={20}
-              step={0.5}
-              valueLabelDisplay='auto'
-              valueLabelFormat={(value) => `${value}rem`}
-              sx={{
-                flex: 1,
-                '& .MuiSlider-thumb': {
-                  '&:hover, &.Mui-focusVisible': {
-                    boxShadow: '0 0 0 8px rgba(107, 114, 128, 0.16)',
-                  },
-                },
-              }}
-            />
-          </Box>
-          <Divider sx={{ my: 2 }} />
+          {viewMode === 'grid' && (
+            <>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Typography
+                  variant='body2'
+                  sx={{ minWidth: '2.5rem', fontWeight: 600 }}
+                >
+                  Size
+                </Typography>
+                <Slider
+                  value={movieSize}
+                  onChange={handleMovieSizeChange}
+                  min={8.5}
+                  max={20}
+                  step={0.5}
+                  valueLabelDisplay='auto'
+                  valueLabelFormat={(value) => `${value}rem`}
+                  sx={{
+                    flex: 1,
+                    '& .MuiSlider-thumb': {
+                      '&:hover, &.Mui-focusVisible': {
+                        boxShadow: '0 0 0 8px rgba(107, 114, 128, 0.16)',
+                      },
+                    },
+                  }}
+                />
+              </Box>
+              <Divider sx={{ my: 2 }} />
+            </>
+          )}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Typography
               variant='body2'
