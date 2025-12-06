@@ -53,10 +53,6 @@ export default function SpinFab() {
         onClick={handleSpin}
         disabled={isSpinning}
         sx={{
-          position: 'fixed',
-          top: '5.5rem',
-          right: '1rem',
-          zIndex: 1000,
           bgcolor: 'rgb(59 130 246 / 0.75)',
           '&:hover': {
             bgcolor: 'rgb(59 130 246 / 0.95)',

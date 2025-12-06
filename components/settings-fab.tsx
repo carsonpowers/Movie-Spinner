@@ -142,10 +142,6 @@ export default function SettingsFab() {
           aria-label='settings'
           onClick={handleClick}
           sx={{
-            position: 'fixed',
-            top: '1rem',
-            right: '1rem',
-            zIndex: 1000,
             bgcolor: 'rgb(107 114 128 / 0.75)',
             '&:hover': {
               bgcolor: 'rgb(107 114 128 / 0.95)',

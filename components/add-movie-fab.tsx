@@ -237,10 +237,6 @@ export default function AddMovieFab({ userId }: AddMovieFabProps) {
           aria-label='add movie'
           onClick={handleClick}
           sx={{
-            position: 'fixed',
-            bottom: '1rem',
-            right: '1rem',
-            zIndex: 1000,
             '&:hover': {
               '& svg': {
                 transform: 'scale(1.1)',

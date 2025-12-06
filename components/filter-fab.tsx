@@ -42,10 +42,6 @@ export default function FilterFab() {
           aria-label='filter movies'
           onClick={handleClick}
           sx={{
-            position: 'fixed',
-            bottom: '5rem',
-            right: '1rem',
-            zIndex: 1000,
             bgcolor: 'rgb(107 114 128 / 0.75)',
             '&:hover': {
               bgcolor: 'rgb(107 114 128 / 0.95)',
