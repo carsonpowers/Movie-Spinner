@@ -17,6 +17,7 @@ export default function SettingsFab() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [movieSize, setMovieSize] = useState(11) // Default 11rem
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid')
+  const [isWheelVisible, setIsWheelVisible] = useState(false)
   const [watchedFilter, setWatchedFilter] = useState<
     'all' | 'hideWatched' | 'onlyWatched'
   >('all')
@@ -61,9 +62,26 @@ export default function SettingsFab() {
       setViewMode(event.detail)
     }
 
+    // Listen for wheel visibility changes
+    const handleWheelVisibility = (event: CustomEvent) => {
+      setIsWheelVisible(event.detail === 'wheel')
+    }
+
     window.addEventListener('viewModeSync', handleViewModeSync as EventListener)
+    window.addEventListener(
+      'wheelVisibilityChange',
+      handleWheelVisibility as EventListener
+    )
+
     return () => {
-      window.removeEventListener('viewModeSync', handleViewModeSync as EventListener)
+      window.removeEventListener(
+        'viewModeSync',
+        handleViewModeSync as EventListener
+      )
+      window.removeEventListener(
+        'wheelVisibilityChange',
+        handleWheelVisibility as EventListener
+      )
     }
   }, [])
 
@@ -166,7 +184,7 @@ export default function SettingsFab() {
         }}
       >
         <Box sx={{ px: 2, py: 1 }}>
-          {viewMode === 'grid' && (
+          {viewMode === 'grid' && !isWheelVisible && (
             <>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <Typography
@@ -196,31 +214,35 @@ export default function SettingsFab() {
               <Divider sx={{ my: 2 }} />
             </>
           )}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Typography
-              variant='body2'
-              sx={{ minWidth: '2.5rem', fontWeight: 600 }}
-            >
-              Friction
-            </Typography>
-            <Slider
-              value={wheelFriction}
-              onChange={handleWheelFrictionChange}
-              min={5}
-              max={100}
-              step={5}
-              valueLabelDisplay='auto'
-              sx={{
-                flex: 1,
-                '& .MuiSlider-thumb': {
-                  '&:hover, &.Mui-focusVisible': {
-                    boxShadow: '0 0 0 8px rgba(107, 114, 128, 0.16)',
-                  },
-                },
-              }}
-            />
-          </Box>
-          <Divider sx={{ my: 2 }} />
+          {isWheelVisible && (
+            <>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Typography
+                  variant='body2'
+                  sx={{ minWidth: '2.5rem', fontWeight: 600 }}
+                >
+                  Friction
+                </Typography>
+                <Slider
+                  value={wheelFriction}
+                  onChange={handleWheelFrictionChange}
+                  min={5}
+                  max={100}
+                  step={5}
+                  valueLabelDisplay='auto'
+                  sx={{
+                    flex: 1,
+                    '& .MuiSlider-thumb': {
+                      '&:hover, &.Mui-focusVisible': {
+                        boxShadow: '0 0 0 8px rgba(107, 114, 128, 0.16)',
+                      },
+                    },
+                  }}
+                />
+              </Box>
+              <Divider sx={{ my: 2 }} />
+            </>
+          )}
           <Box>
             <FormControlLabel
               control={
