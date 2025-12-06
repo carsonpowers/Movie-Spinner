@@ -1,5 +1,5 @@
 /**
- * FAB Container - Client wrapper for conditional FAB rendering
+ * Right Side Menu - Client wrapper for conditional FAB rendering
  * Allows conditional rendering of FABs based on state
  */
 
@@ -12,11 +12,11 @@ import SpinFab from '@/components/spin-fab'
 import FilterFab from '@/components/filter-fab'
 import AddMovieFab from '@/components/add-movie-fab'
 
-interface FabContainerProps {
+interface RightSideMenuProps {
   userId?: string
 }
 
-export default function FabContainer({ userId }: FabContainerProps) {
+export default function RightSideMenu({ userId }: RightSideMenuProps) {
   const [isWheelVisible, setIsWheelVisible] = useState(false)
 
   useEffect(() => {

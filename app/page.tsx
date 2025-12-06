@@ -12,7 +12,7 @@ import Wheel from '@/components/wheel'
 import DownButton from '@/components/down-button'
 import LoadingSpinner from '@/components/loading-spinner'
 import MovieListSkeleton from '@/components/movie-list-skeleton'
-import FabContainer from '@/components/fab-container'
+import RightSideMenu from '@/components/right-side-menu'
 
 // Enable dynamic rendering for auth
 export const dynamic = 'force-dynamic'
@@ -50,7 +50,7 @@ export default async function HomePage() {
       </Suspense>
       <Suspense fallback={null}>
         <Wheel movies={movies} />
-        <FabContainer userId={session?.user?.id} />
+        <RightSideMenu userId={session?.user?.id} />
         <DownButton movieCount={movies.length} />
       </Suspense>
     </main>
