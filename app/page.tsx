@@ -12,11 +12,7 @@ import Wheel from '@/components/wheel'
 import DownButton from '@/components/down-button'
 import LoadingSpinner from '@/components/loading-spinner'
 import MovieListSkeleton from '@/components/movie-list-skeleton'
-import FabList, { FabListItem } from '@/components/fab-list'
-import AddMovieFab from '@/components/add-movie-fab'
-import SettingsFab from '@/components/settings-fab'
-import FilterFab from '@/components/filter-fab'
-import SpinFab from '@/components/spin-fab'
+import FabContainer from '@/components/fab-container'
 
 // Enable dynamic rendering for auth
 export const dynamic = 'force-dynamic'
@@ -54,20 +50,7 @@ export default async function HomePage() {
       </Suspense>
       <Suspense fallback={null}>
         <Wheel movies={movies} />
-        <FabList>
-          <FabListItem>
-            <SettingsFab />
-          </FabListItem>
-          <FabListItem>
-            <SpinFab />
-          </FabListItem>
-          <FabListItem>
-            <FilterFab />
-          </FabListItem>
-          <FabListItem>
-            <AddMovieFab userId={session?.user?.id} />
-          </FabListItem>
-        </FabList>
+        <FabContainer userId={session?.user?.id} />
         <DownButton movieCount={movies.length} />
       </Suspense>
     </main>
