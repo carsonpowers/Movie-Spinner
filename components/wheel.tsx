@@ -6,13 +6,15 @@
 'use client'
 
 import { Wheel as WheelLib, type WheelItem as SpinWheelItem } from 'spin-wheel'
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState, useMemo } from 'react'
 import { easeOutElastic } from 'easing-utils'
 
 interface Movie {
   id?: string
   title: string
   poster?: string
+  year?: string
+  watched?: boolean
 }
 
 interface WheelEvent {
@@ -314,16 +316,65 @@ const destroyWheel = () => {
 
 export default function Wheel({ movies }: { movies: Movie[] }) {
   const wheelContainer = useRef<HTMLDivElement | null>(null)
+  const [filterText, setFilterText] = useState('')
+  const [watchedFilter, setWatchedFilter] = useState<
+    'all' | 'hideWatched' | 'onlyWatched'
+  >('all')
+
+  // Filter movies based on filter text and watched status
+  const filteredMovies = useMemo(
+    () =>
+      movies.filter((movie) => {
+        // Filter by watched status
+        if (watchedFilter === 'hideWatched' && movie.watched) return false
+        if (watchedFilter === 'onlyWatched' && !movie.watched) return false
+
+        // Filter by search text
+        if (!filterText) return true
+        const searchText = filterText.toLowerCase()
+        const titleMatch = movie.title.toLowerCase().includes(searchText)
+        const yearMatch = movie.year?.includes(searchText)
+        return titleMatch || yearMatch
+      }),
+    [movies, watchedFilter, filterText]
+  )
 
   useEffect(() => {
-    if (movies.length > 0) {
-      initWheel(wheelContainer, movies)
+    const handleFilterMovies = (event: CustomEvent) => {
+      setFilterText(event.detail)
+    }
+
+    const handleWatchedFilterChange = (event: CustomEvent) => {
+      setWatchedFilter(event.detail)
+    }
+
+    window.addEventListener('filterMovies', handleFilterMovies as EventListener)
+    window.addEventListener(
+      'watchedFilterChange',
+      handleWatchedFilterChange as EventListener
+    )
+
+    return () => {
+      window.removeEventListener(
+        'filterMovies',
+        handleFilterMovies as EventListener
+      )
+      window.removeEventListener(
+        'watchedFilterChange',
+        handleWatchedFilterChange as EventListener
+      )
+    }
+  }, [])
+
+  useEffect(() => {
+    if (filteredMovies.length > 0) {
+      initWheel(wheelContainer, filteredMovies)
       ;(document as ExtendedDocument).clicks = [
         ...document.querySelectorAll('#clicks > audio'),
       ] as HTMLAudioElement[]
     }
     return destroyWheel
-  }, [movies])
+  }, [filteredMovies])
 
   return (
     <>
