@@ -163,7 +163,8 @@ const DownButton = ({ movieCount }: DownButtonProps) => {
                 icon={<AlbumIcon />}
                 aria-label='Wheel'
                 sx={{
-                  transition: 'transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                  transition:
+                    'transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)',
                   '&:active': {
                     transform: 'translateY(6px)',
                     transition: 'transform 0.1s',
@@ -176,7 +177,8 @@ const DownButton = ({ movieCount }: DownButtonProps) => {
                 icon={<ListIcon />}
                 aria-label='List'
                 sx={{
-                  transition: 'transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                  transition:
+                    'transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)',
                   '&:active': {
                     transform: 'translateY(6px)',
                     transition: 'transform 0.1s',
@@ -189,7 +191,8 @@ const DownButton = ({ movieCount }: DownButtonProps) => {
                 icon={<TableChartIcon />}
                 aria-label='Table'
                 sx={{
-                  transition: 'transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                  transition:
+                    'transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)',
                   '&:active': {
                     transform: 'translateY(6px)',
                     transition: 'transform 0.1s',
