@@ -125,6 +125,7 @@ export class MovieSpinnerStack extends cdk.Stack {
         AUTH_FIREBASE_PRIVATE_KEY: ecs.Secret.fromSecretsManager(appSecret, 'AUTH_FIREBASE_PRIVATE_KEY'),
         OMDB_API_KEY: ecs.Secret.fromSecretsManager(appSecret, 'OMDB_API_KEY'),
         NODE_ENV: ecs.Secret.fromSecretsManager(appSecret, 'NODE_ENV'),
+        AUTH_TRUST_HOST: ecs.Secret.fromSecretsManager(appSecret, 'AUTH_TRUST_HOST'),
       },
     });
 
