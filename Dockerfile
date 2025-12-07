@@ -1,36 +1,33 @@
-# Multi-stage Dockerfile optimized for Bun and Next.js
+# Multi-stage Dockerfile optimized for Node.js and Next.js
 # Production-ready with minimal image size
 
 # Stage 1: Dependencies
-FROM oven/bun:1.1.34-alpine AS deps
+FROM node:20-alpine AS deps
 WORKDIR /app
 
 # Copy package files
-COPY package.json bun.lockb* bunfig.toml ./
+COPY package.json ./
 
-# Install dependencies (including dev dependencies)
-RUN bun install --frozen-lockfile
+# Install dependencies
+RUN npm install
 
 # Stage 2: Builder
-FROM oven/bun:1.1.34-alpine AS builder
+FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Copy dependencies from deps stage
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Copy environment file
-COPY .env.local ./
-
 # Set environment to production
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
 # Build the application
-RUN bun run build
+RUN npm run build
 
 # Stage 3: Runner (Production)
-FROM oven/bun:1.1.34-alpine AS runner
+FROM node:20-alpine AS runner
 WORKDIR /app
 
 # Set environment
@@ -59,7 +56,7 @@ EXPOSE 3000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD bun fetch http://localhost:3000/api/health || exit 1
+  CMD node -e "fetch('http://localhost:3000/api/health').catch(() => process.exit(1))"
 
 # Start the application
-CMD ["bun", "run", "server.js"]
+CMD ["node", "server.js"]

@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "bun next dev --turbopack",
-    "build": "bun next build",
-    "start": "bun next start",
-    "lint": "bun next lint",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
     "test": "bun test",
     "type-check": "tsc --noEmit"
   },
