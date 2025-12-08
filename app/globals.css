@@ -106,12 +106,16 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, 25%);
+    touch-action: none; /* Allow the wheel to handle all touch events */
 }
 
 #wheel canvas {
     width: 100vw !important;
     height: 200vh !important;
     position: relative;
+    touch-action: none; /* Prevent default touch behaviors like scrolling/zooming */
+    -webkit-user-select: none; /* Prevent text selection on iOS */
+    user-select: none; /* Prevent text selection */
 }
 
 #peg {
