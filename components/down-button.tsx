@@ -22,9 +22,20 @@ interface DownButtonProps {
 const DownButton = ({ movieCount }: DownButtonProps) => {
   const [value, setValue] = useState(1) // 0: wheel, 1: grid, 2: table
   const [isNear, setIsNear] = useState(false)
+  const [isTouchDevice, setIsTouchDevice] = useState(false)
   const { showSnackbar } = useSnackbar()
 
   useEffect(() => {
+    // Detect if device is touch-enabled (mobile/tablet)
+    const checkTouchDevice = () => {
+      setIsTouchDevice(
+        'ontouchstart' in window ||
+          navigator.maxTouchPoints > 0 ||
+          window.matchMedia('(pointer: coarse)').matches
+      )
+    }
+    checkTouchDevice()
+
     // Load saved view preference
     const savedView = localStorage.getItem('movieView')
     if (savedView === 'table') {
@@ -111,8 +122,9 @@ const DownButton = ({ movieCount }: DownButtonProps) => {
           sx={{
             width: 'auto',
             transition: 'transform 0.3s ease, opacity 0.3s ease',
-            transform: isNear ? 'translateY(0)' : 'translateY(50%)',
-            opacity: isNear ? 1 : 0.5,
+            transform:
+              isTouchDevice || isNear ? 'translateY(0)' : 'translateY(50%)',
+            opacity: isTouchDevice || isNear ? 1 : 0.5,
           }}
           elevation={3}
         >

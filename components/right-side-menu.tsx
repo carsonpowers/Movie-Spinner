@@ -19,8 +19,19 @@ interface RightSideMenuProps {
 export default function RightSideMenu({ userId }: RightSideMenuProps) {
   const [isWheelVisible, setIsWheelVisible] = useState(false)
   const [isNear, setIsNear] = useState(false)
+  const [isTouchDevice, setIsTouchDevice] = useState(false)
 
   useEffect(() => {
+    // Detect if device is touch-enabled (mobile/tablet)
+    const checkTouchDevice = () => {
+      setIsTouchDevice(
+        'ontouchstart' in window ||
+          navigator.maxTouchPoints > 0 ||
+          window.matchMedia('(pointer: coarse)').matches
+      )
+    }
+    checkTouchDevice()
+
     const handleWheelVisibility = (event: CustomEvent) => {
       setIsWheelVisible(event.detail === 'wheel')
     }
@@ -47,8 +58,9 @@ export default function RightSideMenu({ userId }: RightSideMenuProps) {
       <FabList
         style={{
           transition: 'transform 0.3s ease, opacity 0.3s ease',
-          transform: isNear ? 'translateX(0)' : 'translateX(50%)',
-          opacity: isNear ? 1 : 0.5,
+          transform:
+            isTouchDevice || isNear ? 'translateX(0)' : 'translateX(50%)',
+          opacity: isTouchDevice || isNear ? 1 : 0.5,
         }}
       >
         <FabListItem>
