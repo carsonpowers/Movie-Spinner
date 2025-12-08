@@ -2,11 +2,11 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { createPortal } from 'react-dom'
 import Box from '@mui/material/Box'
 import TextField from '@mui/material/TextField'
 import Autocomplete from '@mui/material/Autocomplete'
 import CircularProgress from '@mui/material/CircularProgress'
-import Grow from '@mui/material/Grow'
 import Paper from '@mui/material/Paper'
 import ClickAwayListener from '@mui/material/ClickAwayListener'
 import { useSnackbar } from '@/contexts/SnackbarContext'
@@ -188,87 +188,86 @@ export default function UnifiedSearchInput({
     }
   }
 
-  return (
-    <>
-      {open && (
-        <Grow in={open} timeout={300}>
-          <Paper
-            sx={{
-              position: 'fixed',
-              bottom: '1rem',
-              right: '1rem',
-              width: 400,
-              maxWidth: '90vw',
-              p: 2,
-              zIndex: 1300,
-              boxShadow: 6,
-            }}
-          >
-            <ClickAwayListener onClickAway={onClose}>
-              <Box>
-                {mode === 'filter' ? (
-                  <TextField
-                    fullWidth
-                    placeholder='Filter by title or year...'
-                    value={inputValue}
-                    onChange={(e) =>
-                      handleInputChange(e as any, e.target.value)
-                    }
-                    autoFocus
-                    InputProps={{
-                      endAdornment: inputValue && (
-                        <Box
-                          component='span'
-                          onClick={handleClear}
-                          sx={{
-                            cursor: 'pointer',
-                            color: 'text.secondary',
-                            '&:hover': { color: 'text.primary' },
-                          }}
-                        >
-                          ✕
-                        </Box>
-                      ),
+  const content = open ? (
+    <Paper
+      sx={{
+        position: 'fixed',
+        bottom: '1rem',
+        right: '1rem',
+        width: 400,
+        maxWidth: '90vw',
+        p: 2,
+        zIndex: 1300,
+        boxShadow: 6,
+        transform: open ? 'scale(1)' : 'scale(0)',
+        transformOrigin: 'bottom right',
+        transition: 'transform 300ms cubic-bezier(0.4, 0, 0.2, 1)',
+      }}
+    >
+      <ClickAwayListener onClickAway={onClose}>
+        <Box>
+          {mode === 'filter' ? (
+            <TextField
+              fullWidth
+              placeholder='Filter by title or year...'
+              value={inputValue}
+              onChange={(e) => handleInputChange(e as any, e.target.value)}
+              autoFocus
+              InputProps={{
+                endAdornment: inputValue && (
+                  <Box
+                    component='span'
+                    onClick={handleClear}
+                    sx={{
+                      cursor: 'pointer',
+                      color: 'text.secondary',
+                      '&:hover': { color: 'text.primary' },
                     }}
-                  />
-                ) : (
-                  <Autocomplete
-                    options={options}
-                    loading={loading}
-                    inputValue={inputValue}
-                    onInputChange={handleInputChange}
-                    onChange={handleChange}
-                    getOptionLabel={(option) =>
-                      `${option.title}${option.year ? ` (${option.year})` : ''}`
-                    }
-                    isOptionEqualToValue={(option, value) =>
-                      option.imdbID === value.imdbID
-                    }
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        placeholder='Search movies…'
-                        autoFocus
-                        InputProps={{
-                          ...params.InputProps,
-                          endAdornment: (
-                            <>
-                              {loading ? (
-                                <CircularProgress color='inherit' size={20} />
-                              ) : null}
-                              {params.InputProps.endAdornment}
-                            </>
-                          ),
-                        }}
-                      />
-                    )}
-                  />
-                )}
-              </Box>
-            </ClickAwayListener>
-          </Paper>
-        </Grow>
-      )}
-    </>
-  )
+                  >
+                    ✕
+                  </Box>
+                ),
+              }}
+            />
+          ) : (
+            <Autocomplete
+              options={options}
+              loading={loading}
+              inputValue={inputValue}
+              onInputChange={handleInputChange}
+              onChange={handleChange}
+              getOptionLabel={(option) =>
+                `${option.title}${option.year ? ` (${option.year})` : ''}`
+              }
+              isOptionEqualToValue={(option, value) =>
+                option.imdbID === value.imdbID
+              }
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  placeholder='Search movies…'
+                  autoFocus
+                  InputProps={{
+                    ...params.InputProps,
+                    endAdornment: (
+                      <>
+                        {loading ? (
+                          <CircularProgress color='inherit' size={20} />
+                        ) : null}
+                        {params.InputProps.endAdornment}
+                      </>
+                    ),
+                  }}
+                />
+              )}
+            />
+          )}
+        </Box>
+      </ClickAwayListener>
+    </Paper>
+  ) : null
+
+  return typeof window !== 'undefined'
+    ? createPortal(content, document.body)
+    : null
 }
