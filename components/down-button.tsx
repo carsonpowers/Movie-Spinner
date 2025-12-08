@@ -11,39 +11,18 @@ import AlbumIcon from '@mui/icons-material/Album'
 import ListIcon from '@mui/icons-material/List'
 import TableChartIcon from '@mui/icons-material/TableChart'
 import Paper from '@mui/material/Paper'
-import Snackbar from '@mui/material/Snackbar'
-import Alert from '@mui/material/Alert'
-import Slide from '@mui/material/Slide'
 import Tooltip from '@mui/material/Tooltip'
-import { TransitionProps } from '@mui/material/transitions'
 import { showWheel, hideWheel } from './wheel'
+import { useSnackbar } from '@/contexts/SnackbarContext'
 
 interface DownButtonProps {
   movieCount: number
 }
 
-interface SnackbarItem {
-  id: number
-  open: boolean
-}
-
-function SlideUpTransition(
-  props: TransitionProps & { children: React.ReactElement }
-) {
-  return <Slide {...props} direction='up' />
-}
-
-function SlideRightTransition(
-  props: TransitionProps & { children: React.ReactElement }
-) {
-  return <Slide {...props} direction='right' />
-}
-
 const DownButton = ({ movieCount }: DownButtonProps) => {
   const [value, setValue] = useState(1) // 0: wheel, 1: grid, 2: table
-  const [snackbars, setSnackbars] = useState<SnackbarItem[]>([])
-  const [nextId, setNextId] = useState(0)
   const [isNear, setIsNear] = useState(false)
+  const { showSnackbar } = useSnackbar()
 
   useEffect(() => {
     // Load saved view preference
@@ -83,27 +62,7 @@ const DownButton = ({ movieCount }: DownButtonProps) => {
   const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
     // Check if user is trying to access wheel with less than 2 movies
     if (newValue === 0 && movieCount < 2) {
-      const newSnackbar: SnackbarItem = {
-        id: nextId,
-        open: true,
-      }
-      setSnackbars((prev) => [...prev, newSnackbar])
-      setNextId((prev) => prev + 1)
-
-      // Auto-close after 4 seconds
-      setTimeout(() => {
-        setSnackbars((prev) =>
-          prev.map((snack) =>
-            snack.id === newSnackbar.id ? { ...snack, open: false } : snack
-          )
-        )
-        // Remove from array after exit animation completes
-        setTimeout(() => {
-          setSnackbars((prev) =>
-            prev.filter((snack) => snack.id !== newSnackbar.id)
-          )
-        }, 500)
-      }, 4000)
+      showSnackbar('Add at least 2 movies to use the wheel', 'warning')
       return
     }
 
@@ -203,29 +162,6 @@ const DownButton = ({ movieCount }: DownButtonProps) => {
           </BottomNavigation>
         </Paper>
       </div>
-      {snackbars.map((snackbar, index) => (
-        <Snackbar
-          key={snackbar.id}
-          open={snackbar.open}
-          TransitionComponent={
-            snackbar.open ? SlideUpTransition : SlideRightTransition
-          }
-          sx={{
-            bottom: `${16 + index * 70}px !important`,
-            transition: 'bottom 0.3s ease-in-out',
-          }}
-        >
-          <Alert
-            severity='warning'
-            sx={{
-              width: '100%',
-              boxShadow: 3,
-            }}
-          >
-            Add at least 2 movies to use the wheel
-          </Alert>
-        </Snackbar>
-      ))}
     </>
   )
 }

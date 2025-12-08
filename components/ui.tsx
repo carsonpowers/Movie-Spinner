@@ -14,10 +14,6 @@ import Fab from '@mui/material/Fab'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import MovieIcon from '@mui/icons-material/Movie'
 import DeleteIcon from '@mui/icons-material/Delete'
-import Snackbar from '@mui/material/Snackbar'
-import Alert from '@mui/material/Alert'
-import Slide from '@mui/material/Slide'
-import { TransitionProps } from '@mui/material/transitions'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
@@ -27,6 +23,7 @@ import TableRow from '@mui/material/TableRow'
 import Paper from '@mui/material/Paper'
 import IconButton from '@mui/material/IconButton'
 import VideoPlayer from './video-player'
+import { useSnackbar } from '@/contexts/SnackbarContext'
 
 interface Movie {
   id?: string
@@ -37,24 +34,6 @@ interface Movie {
   imdbID?: string
   imdbId?: string
   watched?: boolean
-}
-
-interface SnackbarState {
-  open: boolean
-  message: string
-  severity: 'error' | 'warning' | 'info' | 'success'
-}
-
-function SlideUpTransition(
-  props: TransitionProps & { children: React.ReactElement }
-) {
-  return <Slide {...props} direction='up' />
-}
-
-function SlideRightTransition(
-  props: TransitionProps & { children: React.ReactElement }
-) {
-  return <Slide {...props} direction='right' />
 }
 
 const fetchMovieData = async ({
@@ -495,16 +474,12 @@ const MovieTableRow = memo((movie: Movie) => {
 MovieTableRow.displayName = 'MovieTableRow'
 
 function UIContent({ movies, userId }: { movies: Movie[]; userId?: string }) {
-  const [snackbar, setSnackbar] = useState<SnackbarState>({
-    open: false,
-    message: '',
-    severity: 'success',
-  })
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid')
   const [filterText, setFilterText] = useState('')
   const [watchedFilter, setWatchedFilter] = useState<
     'all' | 'hideWatched' | 'onlyWatched'
   >('all')
+  const { showSnackbar } = useSnackbar()
 
   // Memoize event handlers to prevent recreation
   const handleViewChange = useCallback((event: CustomEvent) => {
@@ -519,10 +494,13 @@ function UIContent({ movies, userId }: { movies: Movie[]; userId?: string }) {
     setWatchedFilter(event.detail)
   }, [])
 
-  const handleShowSnackbar = useCallback((event: CustomEvent) => {
-    const { message, severity } = event.detail
-    setSnackbar({ open: true, message, severity })
-  }, [])
+  const handleShowSnackbar = useCallback(
+    (event: CustomEvent) => {
+      const { message, severity } = event.detail
+      showSnackbar(message, severity)
+    },
+    [showSnackbar]
+  )
 
   // Filter movies based on title, year, and watched status
   const filteredMovies = useMemo(
@@ -682,30 +660,6 @@ function UIContent({ movies, userId }: { movies: Movie[]; userId?: string }) {
         <audio src='/flip-5.mp3' preload='auto'></audio>
         <audio src='/flip-6.mp3' preload='auto'></audio>
       </div>
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={4000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-        TransitionComponent={
-          snackbar.open ? SlideUpTransition : SlideRightTransition
-        }
-        sx={{
-          bottom: '16px !important',
-          left: '16px !important',
-          transition: 'bottom 0.3s ease-in-out',
-        }}
-      >
-        <Alert
-          onClose={() => setSnackbar({ ...snackbar, open: false })}
-          severity={snackbar.severity}
-          sx={{
-            width: '100%',
-            boxShadow: 3,
-          }}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
       <VideoPlayer />
     </>
   )
@@ -718,21 +672,10 @@ export default function UI({
   movies: Movie[]
   userId?: string
 }) {
-  const [snackbar, setSnackbar] = useState<SnackbarState>({
-    open: false,
-    message: '',
-    severity: 'success',
-  })
-
-  const handleSnackbar = useCallback(
-    (message: string, severity: SnackbarState['severity']) => {
-      setSnackbar({ open: true, message, severity })
-    },
-    []
-  )
+  const { showSnackbar } = useSnackbar()
 
   return (
-    <MovieProvider onSnackbar={handleSnackbar}>
+    <MovieProvider onSnackbar={showSnackbar}>
       <UIContent movies={movies} userId={userId} />
     </MovieProvider>
   )

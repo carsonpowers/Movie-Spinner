@@ -6,13 +6,10 @@ import Box from '@mui/material/Box'
 import TextField from '@mui/material/TextField'
 import Autocomplete from '@mui/material/Autocomplete'
 import CircularProgress from '@mui/material/CircularProgress'
-import Snackbar from '@mui/material/Snackbar'
-import Alert from '@mui/material/Alert'
-import Slide from '@mui/material/Slide'
 import Grow from '@mui/material/Grow'
 import Paper from '@mui/material/Paper'
 import ClickAwayListener from '@mui/material/ClickAwayListener'
-import { TransitionProps } from '@mui/material/transitions'
+import { useSnackbar } from '@/contexts/SnackbarContext'
 
 interface Movie {
   id?: string
@@ -36,23 +33,11 @@ interface OMDBSearchResponse {
   Response: string
 }
 
-interface SnackbarState {
-  open: boolean
-  message: string
-  severity: 'error' | 'warning' | 'info' | 'success'
-}
-
 interface UnifiedSearchInputProps {
   mode: 'filter' | 'add'
   open: boolean
   onClose: () => void
   userId?: string
-}
-
-function SlideUpTransition(
-  props: TransitionProps & { children: React.ReactElement }
-) {
-  return <Slide {...props} direction='up' />
 }
 
 const fetchMovieData = async ({
@@ -110,11 +95,7 @@ export default function UnifiedSearchInput({
   const [options, setOptions] = useState<readonly Movie[]>([])
   const [loading, setLoading] = useState(false)
   const [inputValue, setInputValue] = useState('')
-  const [snackbar, setSnackbar] = useState<SnackbarState>({
-    open: false,
-    message: '',
-    severity: 'error',
-  })
+  const { showSnackbar } = useSnackbar()
 
   const searchCache = useRef<Map<string, Movie[]>>(new Map())
   const debounceTimer = useRef<NodeJS.Timeout | null>(null)
@@ -191,20 +172,12 @@ export default function UnifiedSearchInput({
 
     try {
       await addMovie(value, value.imdbID || value.title, () => {
-        setSnackbar({
-          open: true,
-          message: `"${value.title}" has been added!`,
-          severity: 'success',
-        })
+        showSnackbar(`"${value.title}" has been added!`, 'success')
         router.refresh()
         onClose()
       })
     } catch (error) {
-      setSnackbar({
-        open: true,
-        message: 'Failed to add movie. Please try again.',
-        severity: 'error',
-      })
+      showSnackbar('Failed to add movie. Please try again.', 'error')
     }
   }
 
@@ -296,24 +269,6 @@ export default function UnifiedSearchInput({
           </Paper>
         </Grow>
       )}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={4000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-        TransitionComponent={SlideUpTransition}
-        sx={{
-          bottom: '16px !important',
-          left: '16px !important',
-        }}
-      >
-        <Alert
-          onClose={() => setSnackbar({ ...snackbar, open: false })}
-          severity={snackbar.severity}
-          sx={{ width: '100%', boxShadow: 3 }}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
     </>
   )
 }
