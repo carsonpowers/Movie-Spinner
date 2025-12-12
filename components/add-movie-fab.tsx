@@ -31,7 +31,12 @@ export default function AddMovieFab({
 
   return (
     <>
-      <Tooltip title='Add Movie' arrow placement='left'>
+      <Tooltip
+        title='Add Movie'
+        arrow
+        placement='left'
+        open={movieCount === 0 ? true : undefined}
+      >
         <Fab
           color='primary'
           aria-label='add movie'

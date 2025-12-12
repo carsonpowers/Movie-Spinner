@@ -63,8 +63,10 @@ export default function RightSideMenu({
         style={{
           transition: 'transform 0.3s ease, opacity 0.3s ease',
           transform:
-            isTouchDevice || isNear ? 'translateX(0)' : 'translateX(50%)',
-          opacity: isTouchDevice || isNear ? 1 : 0.5,
+            isTouchDevice || isNear || movieCount === 0
+              ? 'translateX(0)'
+              : 'translateX(50%)',
+          opacity: isTouchDevice || isNear || movieCount === 0 ? 1 : 0.5,
         }}
       >
         <FabListItem>
