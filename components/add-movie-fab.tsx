@@ -64,9 +64,20 @@ export default function AddMovieFab({
         open={movieCount === 0 ? true : undefined}
         slotProps={{
           tooltip: {
-            sx: movieCount === 0 ? {
-              animation: 'bounce-subtle 3s ease-in-out infinite',
-            } : undefined,
+            sx:
+              movieCount === 0
+                ? {
+                    bgcolor: '#4caf50',
+                    animation:
+                      'bounce-subtle 3s ease-in-out infinite, pulse-glow 2s ease-in-out infinite',
+                    animationDelay: '0.15s',
+                    boxShadow:
+                      '0 0 20px rgba(76, 175, 80, 0.6), 0 0 40px rgba(76, 175, 80, 0.4)',
+                    '& .MuiTooltip-arrow': {
+                      color: '#4caf50',
+                    },
+                  }
+                : undefined,
           },
         }}
       >
