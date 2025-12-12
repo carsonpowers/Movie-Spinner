@@ -50,7 +50,7 @@ export default async function HomePage() {
       </Suspense>
       <Suspense fallback={null}>
         <Wheel movies={movies} />
-        <RightSideMenu userId={session?.user?.id} />
+        <RightSideMenu userId={session?.user?.id} movieCount={movies.length} />
         <DownButton movieCount={movies.length} />
       </Suspense>
     </main>

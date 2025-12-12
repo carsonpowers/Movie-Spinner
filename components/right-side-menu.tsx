@@ -14,9 +14,13 @@ import AddMovieFab from '@/components/add-movie-fab'
 
 interface RightSideMenuProps {
   userId?: string
+  movieCount?: number
 }
 
-export default function RightSideMenu({ userId }: RightSideMenuProps) {
+export default function RightSideMenu({
+  userId,
+  movieCount = 0,
+}: RightSideMenuProps) {
   const [isWheelVisible, setIsWheelVisible] = useState(false)
   const [isNear, setIsNear] = useState(false)
   const [isTouchDevice, setIsTouchDevice] = useState(false)
@@ -75,7 +79,7 @@ export default function RightSideMenu({ userId }: RightSideMenuProps) {
           <FilterFab />
         </FabListItem>
         <FabListItem>
-          <AddMovieFab userId={userId} />
+          <AddMovieFab userId={userId} movieCount={movieCount} />
         </FabListItem>
       </FabList>
     </div>

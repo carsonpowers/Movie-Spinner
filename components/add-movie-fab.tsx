@@ -8,9 +8,13 @@ import UnifiedSearchInput from '@/components/unified-search-input'
 
 interface AddMovieFabProps {
   userId?: string
+  movieCount?: number
 }
 
-export default function AddMovieFab({ userId }: AddMovieFabProps) {
+export default function AddMovieFab({
+  userId,
+  movieCount = 0,
+}: AddMovieFabProps) {
   const [open, setOpen] = useState(false)
 
   const handleClick = () => {
@@ -33,12 +37,24 @@ export default function AddMovieFab({ userId }: AddMovieFabProps) {
           aria-label='add movie'
           onClick={handleClick}
           sx={{
-            '&:hover': {
-              '& svg': {
-                transform: 'rotate(90deg) scale(1.1)',
-                transition: 'transform 0.2s ease-in-out',
+            ...(movieCount === 0 && {
+              bgcolor: '#4caf50',
+              '&:hover': {
+                bgcolor: '#45a049',
+                '& svg': {
+                  transform: 'rotate(90deg) scale(1.1)',
+                  transition: 'transform 0.2s ease-in-out',
+                },
               },
-            },
+            }),
+            ...((movieCount ?? 0) > 0 && {
+              '&:hover': {
+                '& svg': {
+                  transform: 'rotate(90deg) scale(1.1)',
+                  transition: 'transform 0.2s ease-in-out',
+                },
+              },
+            }),
             '& svg': {
               transition: 'none',
             },
