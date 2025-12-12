@@ -16,6 +16,7 @@ export default function AddMovieFab({
   movieCount = 0,
 }: AddMovieFabProps) {
   const [open, setOpen] = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
 
   const handleClick = () => {
     setOpen(true)
@@ -38,12 +39,10 @@ export default function AddMovieFab({
             100% {
               box-shadow: 0 0 20px rgba(76, 175, 80, 0.6),
                 0 0 40px rgba(76, 175, 80, 0.4), 0 0 60px rgba(76, 175, 80, 0.2);
-              transform: scale(1);
             }
             50% {
               box-shadow: 0 0 30px rgba(76, 175, 80, 0.8),
                 0 0 60px rgba(76, 175, 80, 0.6), 0 0 90px rgba(76, 175, 80, 0.4);
-              transform: scale(1.05);
             }
           }
           @keyframes bounce-subtle {
@@ -68,9 +67,9 @@ export default function AddMovieFab({
               movieCount === 0
                 ? {
                     bgcolor: '#4caf50',
-                    animation:
-                      'bounce-subtle 3s ease-in-out infinite, pulse-glow 2s ease-in-out infinite',
-                    animationDelay: '0.15s',
+                    animation: isHovered
+                      ? 'pulse-glow 2s ease-in-out infinite'
+                      : 'bounce-subtle 3s ease-in-out infinite, pulse-glow 2s ease-in-out infinite',
                     boxShadow:
                       '0 0 20px rgba(76, 175, 80, 0.6), 0 0 40px rgba(76, 175, 80, 0.4)',
                     '& .MuiTooltip-arrow': {
@@ -85,6 +84,8 @@ export default function AddMovieFab({
           color='primary'
           aria-label='add movie'
           onClick={handleClick}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
           sx={{
             ...(movieCount === 0 && {
               bgcolor: '#4caf50',
