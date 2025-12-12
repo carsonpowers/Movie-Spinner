@@ -62,6 +62,13 @@ export default function AddMovieFab({
         arrow
         placement='left'
         open={movieCount === 0 ? true : undefined}
+        slotProps={{
+          tooltip: {
+            sx: movieCount === 0 ? {
+              animation: 'bounce-subtle 3s ease-in-out infinite',
+            } : undefined,
+          },
+        }}
       >
         <Fab
           color='primary'
