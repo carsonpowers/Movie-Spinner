@@ -31,6 +31,32 @@ export default function AddMovieFab({
 
   return (
     <>
+      {movieCount === 0 && (
+        <style jsx global>{`
+          @keyframes pulse-glow {
+            0%,
+            100% {
+              box-shadow: 0 0 20px rgba(76, 175, 80, 0.6),
+                0 0 40px rgba(76, 175, 80, 0.4), 0 0 60px rgba(76, 175, 80, 0.2);
+              transform: scale(1);
+            }
+            50% {
+              box-shadow: 0 0 30px rgba(76, 175, 80, 0.8),
+                0 0 60px rgba(76, 175, 80, 0.6), 0 0 90px rgba(76, 175, 80, 0.4);
+              transform: scale(1.05);
+            }
+          }
+          @keyframes bounce-subtle {
+            0%,
+            100% {
+              transform: translateY(0);
+            }
+            50% {
+              transform: translateY(-8px);
+            }
+          }
+        `}</style>
+      )}
       <Tooltip
         title='Add Movie'
         arrow
@@ -44,8 +70,11 @@ export default function AddMovieFab({
           sx={{
             ...(movieCount === 0 && {
               bgcolor: '#4caf50',
+              animation:
+                'pulse-glow 2s ease-in-out infinite, bounce-subtle 3s ease-in-out infinite',
               '&:hover': {
                 bgcolor: '#45a049',
+                animation: 'none',
                 '& svg': {
                   transform: 'rotate(90deg) scale(1.1)',
                   transition: 'transform 0.2s ease-in-out',
