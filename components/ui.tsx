@@ -338,7 +338,7 @@ MovieListItem.displayName = 'MovieListItem'
 const MovieList = ({ children }: { children: React.ReactNode }) => (
   <ul
     id='movie-list'
-    className='flex p-4 flex-wrap transition-all duration-1000 ease-smooth content-start justify-start max-h-[75vh] gap-x-4 scrollbar-thin scrollbar-thumb-purple'
+    className='flex p-4 flex-wrap transition-all duration-1000 ease-smooth content-start justify-start max-h-[75vh] gap-x-4 scrollbar-thin scrollbar-thumb-purple overflow-y-auto'
   >
     {children}
   </ul>

@@ -72,6 +72,7 @@ export default function AddMovieFab({
                       : 'bounce-subtle 3s ease-in-out infinite, pulse-glow 2s ease-in-out infinite',
                     boxShadow:
                       '0 0 20px rgba(76, 175, 80, 0.6), 0 0 40px rgba(76, 175, 80, 0.4)',
+                    pointerEvents: 'none',
                     '& .MuiTooltip-arrow': {
                       color: '#4caf50',
                     },
