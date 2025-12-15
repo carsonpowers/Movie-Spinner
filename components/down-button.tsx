@@ -114,7 +114,7 @@ const DownButton = ({ movieCount }: DownButtonProps) => {
   return (
     <>
       <div
-        className='fixed bottom-0 left-1/2 z-30 -translate-x-1/2 p-20 pb-0'
+        className='fixed bottom-0 left-1/2 z-30 -translate-x-1/2 p-10 pb-0'
         onMouseEnter={() => setIsNear(true)}
         onMouseLeave={() => setIsNear(false)}
       >
