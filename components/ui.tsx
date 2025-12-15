@@ -94,7 +94,7 @@ const ListItem = ({
   return (
     <li
       id={id}
-      className={`flex-none transition-all duration-1000 ease-smooth cursor-pointer h-item hover:z-10 hover:transition-none hover:-translate-y-0.5 focus:-translate-y-0.5 ${
+      className={`flex-none transition-all duration-1000 ease-smooth cursor-pointer h-item hover:z-10 hover:transition-none hover:-translate-y-0.5 focus:-translate-y-0.5 -mt-8 first:mt-0 ${
         className || ''
       }`}
       data-id={id}
