@@ -341,7 +341,7 @@ const MovieList = ({ children }: { children: React.ReactNode }) => (
     className='
       flex flex-wrap w-full transition-all duration-1000 ease-smooth
       content-start justify-evenly max-h-[100vh] gap-x-4 scrollbar-thin
-      scrollbar-thumb-purple overflow-y-auto
+      scrollbar-thumb-purple overflow-y-auto p-20
     '
   >
     {children}
@@ -569,9 +569,9 @@ function UIContent({ movies, userId }: { movies: Movie[]; userId?: string }) {
     <>
       <section
         id='movie-list-container'
-        className={`opacity-100 ${
+        className={`opacity-100  pt-10 ${
           viewMode === 'grid' ? 'h-screen' : 'min-h-screen'
-        } flex transition-all duration-1000 ease-smooth justify-evenly m-0 p-20 box-border overflow-auto`}
+        } flex transition-all duration-1000 ease-smooth justify-evenly m-0 box-border overflow-auto`}
       >
         {viewMode === 'grid' ? (
           <MovieList>
