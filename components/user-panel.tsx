@@ -36,7 +36,20 @@ export default function UserPanel({ user }: UserPanelProps) {
     return (
       <div className='fixed top-4 left-4 z-[100000]'>
         <form action={handleSignIn}>
-          <Button type='submit' variant='outline'>
+          <Button
+            type='submit'
+            variant='default'
+            sx={{
+              backgroundColor: '#111827',
+              backdropFilter: 'blur(10px)',
+              border: 'solid 1px rgba(255, 255, 255, 0.1)',
+              color: 'white !important',
+              '&:hover': {
+                backgroundColor: '#1f2937',
+                border: 'solid 1px rgba(255, 255, 255, 0.3)',
+              },
+            }}
+          >
             Sign In
           </Button>
         </form>
@@ -56,7 +69,17 @@ export default function UserPanel({ user }: UserPanelProps) {
   return (
     <div className='fixed top-4 left-4 z-[100000]'>
       <Button
-        variant='outline'
+        variant='default'
+        sx={{
+          backgroundColor: '#111827',
+          backdropFilter: 'blur(10px)',
+          border: 'solid 1px rgba(255, 255, 255, 0.1)',
+          color: 'white !important',
+          '&:hover': {
+            backgroundColor: '#1f2937',
+            border: 'solid 1px rgba(255, 255, 255, 0.3)',
+          },
+        }}
         onClick={handleClick}
         className='gap-2 px-2 text-gray-500 hover:text-gray-950 transition-colors duration-300 ease-in'
       >
