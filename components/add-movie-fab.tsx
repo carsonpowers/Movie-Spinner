@@ -60,7 +60,7 @@ export default function AddMovieFab({
         title='Add Movie'
         arrow
         placement='left'
-        open={movieCount === 0 ? true : undefined}
+        open={movieCount === 0 ? !isHovered : undefined}
         slotProps={{
           tooltip: {
             sx:
