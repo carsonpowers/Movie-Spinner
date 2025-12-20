@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "next lint",
     "test": "bun test",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "deploy": "cd cdk && bun cdk deploy"
   },
   "dependencies": {
     "@auth/firebase-adapter": "^2.7.4",
