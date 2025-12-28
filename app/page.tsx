@@ -6,13 +6,13 @@
 import { Suspense } from 'react'
 import { auth } from '@/auth'
 import { getUserMovies } from '@/lib/firebase/firestore'
-import UserPanel from '@/components/user-panel'
-import UI from '@/components/ui'
-import Wheel from '@/components/wheel'
-import DownButton from '@/components/down-button'
-import LoadingSpinner from '@/components/loading-spinner'
-import MovieListSkeleton from '@/components/movie-list-skeleton'
-import RightSideMenu from '@/components/right-side-menu'
+import UserPanel from '@/components/layout/user-panel'
+import MovieList from '@/components/movie/movie-list'
+import Wheel from '@/components/movie/wheel'
+import ViewNavigation from '@/components/layout/bottom-navigation'
+import LoadingSpinner from '@/components/common/loading-spinner'
+import MovieListSkeleton from '@/components/movie/movie-list-skeleton'
+import RightSideMenu from '@/components/layout/right-side-menu'
 
 // Enable dynamic rendering for auth
 export const dynamic = 'force-dynamic'
@@ -46,12 +46,12 @@ export default async function HomePage() {
         <UserPanel user={session?.user} />
       </Suspense>
       <Suspense fallback={<MovieListSkeleton count={12} />}>
-        <UI movies={movies} userId={session?.user?.id} />
+        <MovieList movies={movies} userId={session?.user?.id} />
       </Suspense>
       <Suspense fallback={null}>
         <Wheel movies={movies} />
         <RightSideMenu userId={session?.user?.id} movieCount={movies.length} />
-        <DownButton movieCount={movies.length} />
+        <ViewNavigation movieCount={movies.length} />
       </Suspense>
     </main>
   )

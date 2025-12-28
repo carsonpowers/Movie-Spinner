@@ -6,7 +6,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter, Bebas_Neue } from 'next/font/google'
 import './globals.css'
-import MuiThemeProvider from '@/components/MuiThemeProvider'
+import MuiThemeProvider from '@/components/providers/mui-theme-provider'
 import { SnackbarProvider } from '@/contexts/SnackbarContext'
 
 const inter = Inter({

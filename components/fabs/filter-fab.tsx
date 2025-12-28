@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Fab from '@mui/material/Fab'
 import SearchIcon from '@mui/icons-material/Search'
 import Tooltip from '@mui/material/Tooltip'
-import UnifiedSearchInput from '@/components/unified-search-input'
+import SearchInput from '@/components/common/search-input'
 
 export default function FilterFab() {
   const [open, setOpen] = useState(false)
@@ -41,7 +41,7 @@ export default function FilterFab() {
           <SearchIcon sx={{ color: 'white' }} />
         </Fab>
       </Tooltip>
-      <UnifiedSearchInput mode='filter' open={open} onClose={handleClose} />
+      <SearchInput mode='filter' open={open} onClose={handleClose} />
     </>
   )
 }

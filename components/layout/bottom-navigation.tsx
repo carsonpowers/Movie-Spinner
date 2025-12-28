@@ -12,14 +12,14 @@ import ListIcon from '@mui/icons-material/List'
 import TableChartIcon from '@mui/icons-material/TableChart'
 import Paper from '@mui/material/Paper'
 import Tooltip from '@mui/material/Tooltip'
-import { showWheel, hideWheel } from './wheel'
+import { showWheel, hideWheel } from '@/components/movie/wheel'
 import { useSnackbar } from '@/contexts/SnackbarContext'
 
-interface DownButtonProps {
+interface ViewNavigationProps {
   movieCount: number
 }
 
-const DownButton = ({ movieCount }: DownButtonProps) => {
+const ViewNavigation = ({ movieCount }: ViewNavigationProps) => {
   const [value, setValue] = useState(1) // 0: wheel, 1: grid, 2: table
   const [isNear, setIsNear] = useState(false)
   const [isTouchDevice, setIsTouchDevice] = useState(false)
@@ -178,4 +178,4 @@ const DownButton = ({ movieCount }: DownButtonProps) => {
   )
 }
 
-export default DownButton
+export default ViewNavigation

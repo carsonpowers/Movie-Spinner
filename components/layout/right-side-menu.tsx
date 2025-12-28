@@ -6,11 +6,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import FabList, { FabListItem } from '@/components/fab-list'
-import SettingsFab from '@/components/settings-fab'
-import SpinFab from '@/components/spin-fab'
-import FilterFab from '@/components/filter-fab'
-import AddMovieFab from '@/components/add-movie-fab'
+import FabList, { FabListItem } from '@/components/fabs/fab-list'
+import SettingsFab from '@/components/fabs/settings-fab'
+import SpinFab from '@/components/fabs/spin-fab'
+import FilterFab from '@/components/fabs/filter-fab'
+import AddMovieFab from '@/components/fabs/add-movie-fab'
 
 interface RightSideMenuProps {
   userId?: string

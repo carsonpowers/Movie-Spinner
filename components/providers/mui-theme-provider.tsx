@@ -3,7 +3,7 @@
 import { ThemeProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import { darkTheme } from '@/lib/theme'
-import EmotionCacheProvider from './EmotionCacheProvider'
+import EmotionCacheProvider from './emotion-cache-provider'
 
 export default function MuiThemeProvider({
   children,

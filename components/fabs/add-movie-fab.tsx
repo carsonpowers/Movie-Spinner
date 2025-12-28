@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Fab from '@mui/material/Fab'
 import AddIcon from '@mui/icons-material/Add'
 import Tooltip from '@mui/material/Tooltip'
-import UnifiedSearchInput from '@/components/unified-search-input'
+import SearchInput from '@/components/common/search-input'
 
 interface AddMovieFabProps {
   userId?: string
@@ -115,7 +115,7 @@ export default function AddMovieFab({
           <AddIcon />
         </Fab>
       </Tooltip>
-      <UnifiedSearchInput
+      <SearchInput
         mode='add'
         open={open}
         onClose={handleClose}
