@@ -9,6 +9,7 @@ import { getUserMovies } from '@/lib/firebase/firestore'
 import UserPanel from '@/components/layout/user-panel'
 import MovieList from '@/components/movie/movie-list'
 import Wheel from '@/components/movie/wheel'
+import RatingPopup from '@/components/movie/rating-popup'
 import ViewNavigation from '@/components/layout/bottom-navigation'
 import LoadingSpinner from '@/components/common/loading-spinner'
 import MovieListSkeleton from '@/components/movie/movie-list-skeleton'
@@ -50,6 +51,7 @@ export default async function HomePage() {
       </Suspense>
       <Suspense fallback={null}>
         <Wheel movies={movies} />
+        <RatingPopup />
         <RightSideMenu userId={session?.user?.id} movieCount={movies.length} />
         <ViewNavigation movieCount={movies.length} />
       </Suspense>

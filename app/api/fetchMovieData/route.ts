@@ -6,6 +6,7 @@
 // cSpell:ignore OMDB maxage imdb
 
 import { NextRequest, NextResponse } from 'next/server'
+import type { OMDBResponse } from '@/types/omdb'
 
 export const runtime = 'edge'
 
@@ -69,6 +70,59 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error('Error fetching movie data:', error)
+    return NextResponse.json(
+      { error: 'Failed to fetch movie data' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url)
+  const imdbId = searchParams.get('imdbId')
+
+  if (!imdbId) {
+    return NextResponse.json({ error: 'Missing imdbId parameter' }, { status: 400 })
+  }
+
+  const apiKey = process.env.OMDB_API_KEY || process.env.MOVIE_API_KEY
+
+  if (!apiKey) {
+    console.error('OMDB API key not configured')
+    return NextResponse.json({ error: 'OMDB API key not configured' }, { status: 500 })
+  }
+
+  try {
+    const response = await fetch(
+      `http://www.omdbapi.com/?i=${imdbId}&apikey=${apiKey}`,
+      {
+        next: {
+          revalidate: CACHE_DURATION,
+        },
+      }
+    )
+
+    if (!response.ok) {
+      return NextResponse.json(
+        { error: 'Failed to fetch movie data from OMDB' },
+        { status: response.status }
+      )
+    }
+
+    const data: OMDBResponse = await response.json()
+
+    if ('Error' in data) {
+      return NextResponse.json({ error: data.Error }, { status: 404 })
+    }
+
+    return NextResponse.json(data, {
+      status: 200,
+      headers: {
+        'Cache-Control': `public, s-maxage=${CACHE_DURATION}, stale-while-revalidate=${CACHE_DURATION * 2}`,
+      },
+    })
+  } catch (error) {
+    console.error('Error fetching movie data by IMDB ID:', error)
     return NextResponse.json(
       { error: 'Failed to fetch movie data' },
       { status: 500 }

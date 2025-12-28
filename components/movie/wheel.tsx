@@ -8,6 +8,7 @@
 import { Wheel as WheelLib, type WheelItem as SpinWheelItem } from 'spin-wheel'
 import React, { useEffect, useRef, useState, useMemo } from 'react'
 import { easeOutElastic } from 'easing-utils'
+import type { OMDBMovieData } from '@/types/omdb'
 
 interface Movie {
   id?: string
@@ -49,6 +50,7 @@ const itemConfig = {
 let lockWheel: boolean | undefined
 let moviesRef: Movie[] = []
 let preloadedTrailer: { movieId: string; videoUrl: string } | null = null
+let preloadedMovieData: { movieId: string; data: OMDBMovieData } | null = null
 
 /**
  * Calculates which wheel item the wheel will land on after spinning.
@@ -233,8 +235,9 @@ const initWheel = async (
     console.log('🎯 Predicted landing item:', predictedIndex)
     console.log('🎬 Predicted movie:', movies[predictedIndex]?.title)
 
-    // Preload trailer for predicted movie while wheel is spinning
+    // Preload trailer and movie data for predicted movie while wheel is spinning
     preloadTrailer(predictedIndex)
+    preloadMovieData(predictedIndex)
   }
 
   // Listen for friction changes
@@ -256,7 +259,7 @@ const onRest = ({ currentIndex, rotation }: WheelEvent) => {
   else {
     rotateToCenterAndLockWheel(currentIndex)
     playResultSound()
-    scrapeAndPlayTrailer(currentIndex)
+    playTrailerWithRating(currentIndex)
   }
 }
 
@@ -308,6 +311,104 @@ const preloadTrailer = async (predictedIndex: number) => {
   } catch (error) {
     console.error('Failed to preload trailer:', error)
   }
+}
+
+/**
+ * Preloads movie data (including rating) for the predicted movie while the wheel is spinning.
+ * Stores the result in preloadedMovieData for display when wheel stops.
+ */
+const preloadMovieData = async (predictedIndex: number) => {
+  const movie = moviesRef[predictedIndex]
+  if (!movie?.id) return
+
+  // Clear any previously preloaded movie data
+  preloadedMovieData = null
+
+  try {
+    console.log('⏳ Preloading movie data for:', movie.title)
+    const response = await fetch(`/api/fetchMovieData?imdbId=${movie.id}`)
+    const data = await response.json()
+
+    if (data.imdbRating) {
+      // Store preloaded data
+      preloadedMovieData = {
+        movieId: movie.id,
+        data: data as OMDBMovieData,
+      }
+      console.log(
+        '✅ Movie data preloaded for:',
+        movie.title,
+        'Rating:',
+        data.imdbRating
+      )
+    }
+  } catch (error) {
+    console.error('Failed to preload movie data:', error)
+  }
+}
+
+/**
+ * Shows a rating popup for 3 seconds, then resolves.
+ */
+const showRatingPopup = (rating: string, title: string): Promise<void> => {
+  return new Promise((resolve) => {
+    // Dispatch event to show the rating popup
+    const showEvent = new CustomEvent('showRatingPopup', {
+      detail: { rating, title },
+    })
+    window.dispatchEvent(showEvent)
+
+    // After 3 seconds, hide the popup and resolve
+    setTimeout(() => {
+      const hideEvent = new CustomEvent('hideRatingPopup')
+      window.dispatchEvent(hideEvent)
+      resolve()
+    }, 3000)
+  })
+}
+
+/**
+ * Handles playing the trailer, optionally showing a rating popup first.
+ */
+const playTrailerWithRating = async (currentIndex: number) => {
+  const movie = moviesRef[currentIndex]
+  if (!movie?.id) return
+
+  // Check if we have preloaded movie data with a rating
+  if (
+    preloadedMovieData &&
+    preloadedMovieData.movieId === movie.id &&
+    preloadedMovieData.data.imdbRating
+  ) {
+    console.log(
+      '🎬 Showing rating popup for:',
+      movie.title,
+      'Rating:',
+      preloadedMovieData.data.imdbRating
+    )
+    await showRatingPopup(preloadedMovieData.data.imdbRating, movie.title)
+    preloadedMovieData = null
+  } else if (movie.id) {
+    // Fallback: try to fetch movie data if not preloaded
+    try {
+      const response = await fetch(`/api/fetchMovieData?imdbId=${movie.id}`)
+      const data = await response.json()
+      if (data.imdbRating) {
+        console.log(
+          '🎬 Showing rating popup (fetched) for:',
+          movie.title,
+          'Rating:',
+          data.imdbRating
+        )
+        await showRatingPopup(data.imdbRating, movie.title)
+      }
+    } catch (error) {
+      console.error('Failed to fetch movie data for rating:', error)
+    }
+  }
+
+  // Now play the trailer
+  await scrapeAndPlayTrailer(currentIndex)
 }
 
 export const scrapeAndPlayTrailer = async (currentIndex: number) => {
