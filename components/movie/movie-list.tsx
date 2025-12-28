@@ -36,32 +36,6 @@ interface Movie {
   watched?: boolean
 }
 
-const fetchMovieData = async ({
-  title,
-  search = false,
-}: {
-  title: string
-  search?: boolean
-}) => {
-  try {
-    const response = await fetch('/api/fetchMovieData', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ Title: title, search }),
-    })
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-    const data = await response.json()
-    return data
-  } catch (error) {
-    console.error('Error fetching movie data:', error)
-    return null
-  }
-}
-
 let currentFlip: HTMLAudioElement | null = null
 let currentFlippedCard: (() => void) | null = null
 
