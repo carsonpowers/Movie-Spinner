@@ -48,6 +48,7 @@ const itemConfig = {
 
 let lockWheel: boolean | undefined
 let moviesRef: Movie[] = []
+let preloadedTrailer: { movieId: string; videoUrl: string } | null = null
 
 /**
  * Calculates which wheel item the wheel will land on after spinning.
@@ -227,6 +228,9 @@ const initWheel = async (
 
     console.log('🎯 Predicted landing item:', predictedIndex)
     console.log('🎬 Predicted movie:', movies[predictedIndex]?.title)
+
+    // Preload trailer for predicted movie while wheel is spinning
+    preloadTrailer(predictedIndex)
   }
 
   // Listen for friction changes
@@ -266,16 +270,85 @@ const playResultSound = () => {
   }
 }
 
+/**
+ * Preloads trailer data for the predicted movie while the wheel is spinning.
+ * Stores the result in preloadedTrailer for immediate playback when wheel stops.
+ */
+const preloadTrailer = async (predictedIndex: number) => {
+  const movie = moviesRef[predictedIndex]
+  if (!movie?.id) return
+
+  // Clear any previously preloaded trailer
+  preloadedTrailer = null
+
+  try {
+    console.log('⏳ Preloading trailer for:', movie.title)
+    const response = await fetch(`/api/scrape-trailer?imdbId=${movie.id}`)
+    const data = await response.json()
+
+    if (data.videoUrl) {
+      // Store preloaded data
+      preloadedTrailer = {
+        movieId: movie.id,
+        videoUrl: data.videoUrl,
+      }
+
+      // Preload the video element
+      const videoPlayer = document.getElementById(
+        'trailer-player'
+      ) as HTMLVideoElement
+      if (videoPlayer) {
+        videoPlayer.src = data.videoUrl
+        videoPlayer.preload = 'auto'
+        videoPlayer.load()
+      }
+
+      console.log('✅ Trailer preloaded for:', movie.title)
+    }
+  } catch (error) {
+    console.error('Failed to preload trailer:', error)
+  }
+}
+
 export const scrapeAndPlayTrailer = async (currentIndex: number) => {
   const movie = moviesRef[currentIndex]
   if (!movie?.id) return
 
+  const videoPlayer = document.getElementById(
+    'trailer-player'
+  ) as HTMLVideoElement
+
+  // Check if we have a preloaded trailer for this movie
+  if (preloadedTrailer && preloadedTrailer.movieId === movie.id) {
+    console.log('🚀 Using preloaded trailer for:', movie.title)
+    if (videoPlayer) {
+      videoPlayer.style.display = 'block'
+      videoPlayer.play().catch((err) => {
+        console.error('Error playing video:', err)
+        const event = new CustomEvent('showSnackbar', {
+          detail: {
+            message: 'Failed to play video',
+            severity: 'error',
+          },
+        })
+        window.dispatchEvent(event)
+      })
+
+      videoPlayer.onended = () => {
+        videoPlayer.style.display = 'none'
+      }
+    }
+    preloadedTrailer = null
+    return
+  }
+
+  // Fallback: fetch trailer if not preloaded (prediction was wrong or preload failed)
+  console.log('📥 Fetching trailer (not preloaded) for:', movie.title)
   try {
     const response = await fetch(`/api/scrape-trailer?imdbId=${movie.id}`)
     const data = await response.json()
 
     if (data.error) {
-      // Show error snackbar when no video is found
       const event = new CustomEvent('showSnackbar', {
         detail: {
           message:
@@ -289,29 +362,22 @@ export const scrapeAndPlayTrailer = async (currentIndex: number) => {
       return
     }
 
-    if (data.videoUrl) {
-      const videoPlayer = document.getElementById(
-        'trailer-player'
-      ) as HTMLVideoElement
-
-      if (videoPlayer) {
-        // Set video source and display it
-        videoPlayer.src = data.videoUrl
-        videoPlayer.style.display = 'block'
-        videoPlayer.play().catch((err) => {
-          console.error('Error playing video:', err)
-          const event = new CustomEvent('showSnackbar', {
-            detail: {
-              message: 'Failed to play video',
-              severity: 'error',
-            },
-          })
-          window.dispatchEvent(event)
+    if (data.videoUrl && videoPlayer) {
+      videoPlayer.src = data.videoUrl
+      videoPlayer.style.display = 'block'
+      videoPlayer.play().catch((err) => {
+        console.error('Error playing video:', err)
+        const event = new CustomEvent('showSnackbar', {
+          detail: {
+            message: 'Failed to play video',
+            severity: 'error',
+          },
         })
+        window.dispatchEvent(event)
+      })
 
-        videoPlayer.onended = () => {
-          videoPlayer.style.display = 'none'
-        }
+      videoPlayer.onended = () => {
+        videoPlayer.style.display = 'none'
       }
     }
   } catch (error) {
