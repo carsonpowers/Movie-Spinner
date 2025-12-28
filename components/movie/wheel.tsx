@@ -348,36 +348,50 @@ const preloadMovieData = async (predictedIndex: number) => {
 }
 
 /**
- * Shows a rating popup for 3 seconds, then resolves.
+ * Shows a rating popup until user dismisses it or clicks play.
+ * Returns true if user clicked play, false if dismissed.
  */
 const showRatingPopup = (
   rating: string,
   title: string,
   poster?: string,
   year?: string
-): Promise<void> => {
+): Promise<boolean> => {
   return new Promise((resolve) => {
+    const handlePlay = () => {
+      cleanup()
+      resolve(true)
+    }
+
+    const handleDismiss = () => {
+      cleanup()
+      resolve(false)
+    }
+
+    const cleanup = () => {
+      window.removeEventListener('playTrailerFromPopup', handlePlay)
+      window.removeEventListener('hideRatingPopup', handleDismiss)
+    }
+
+    window.addEventListener('playTrailerFromPopup', handlePlay)
+    window.addEventListener('hideRatingPopup', handleDismiss)
+
     // Dispatch event to show the rating popup
     const showEvent = new CustomEvent('showRatingPopup', {
       detail: { rating, title, poster, year },
     })
     window.dispatchEvent(showEvent)
-
-    // After 3 seconds, hide the popup and resolve
-    setTimeout(() => {
-      const hideEvent = new CustomEvent('hideRatingPopup')
-      window.dispatchEvent(hideEvent)
-      resolve()
-    }, 3000)
   })
 }
 
 /**
- * Handles playing the trailer, optionally showing a rating popup first.
+ * Handles showing the rating popup and optionally playing the trailer.
  */
 const playTrailerWithRating = async (currentIndex: number) => {
   const movie = moviesRef[currentIndex]
   if (!movie?.id) return
+
+  let shouldPlayTrailer = false
 
   // Check if we have preloaded movie data with a rating
   if (
@@ -391,7 +405,7 @@ const playTrailerWithRating = async (currentIndex: number) => {
       'Rating:',
       preloadedMovieData.data.imdbRating
     )
-    await showRatingPopup(
+    shouldPlayTrailer = await showRatingPopup(
       preloadedMovieData.data.imdbRating,
       movie.title,
       preloadedMovieData.data.Poster,
@@ -410,7 +424,7 @@ const playTrailerWithRating = async (currentIndex: number) => {
           'Rating:',
           data.imdbRating
         )
-        await showRatingPopup(
+        shouldPlayTrailer = await showRatingPopup(
           data.imdbRating,
           movie.title,
           data.Poster,
@@ -422,8 +436,10 @@ const playTrailerWithRating = async (currentIndex: number) => {
     }
   }
 
-  // Now play the trailer
-  await scrapeAndPlayTrailer(currentIndex)
+  // Only play the trailer if user clicked the play button
+  if (shouldPlayTrailer) {
+    await scrapeAndPlayTrailer(currentIndex)
+  }
 }
 
 export const scrapeAndPlayTrailer = async (currentIndex: number) => {

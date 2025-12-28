@@ -1,13 +1,15 @@
 /**
  * Rating Popup Component
- * Displays the IMDB rating for 3 seconds after the wheel stops
+ * Displays the IMDB rating until user clicks outside or plays trailer
  * Uses a MovieListItem-style card with rating-based background color
  */
 
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import Tilt from 'react-parallax-tilt'
+import PlayArrowIcon from '@mui/icons-material/PlayArrow'
+import Fab from '@mui/material/Fab'
 
 interface RatingPopupData {
   rating: string
@@ -19,6 +21,27 @@ interface RatingPopupData {
 export default function RatingPopup() {
   const [isVisible, setIsVisible] = useState(false)
   const [ratingData, setRatingData] = useState<RatingPopupData | null>(null)
+  const popupRef = useRef<HTMLDivElement>(null)
+
+  const handleDismiss = () => {
+    setIsVisible(false)
+    const hideEvent = new CustomEvent('hideRatingPopup')
+    window.dispatchEvent(hideEvent)
+  }
+
+  const handlePlayTrailer = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setIsVisible(false)
+    const playEvent = new CustomEvent('playTrailerFromPopup')
+    window.dispatchEvent(playEvent)
+  }
+
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    // Only dismiss if clicking outside the popup card
+    if (popupRef.current && !popupRef.current.contains(e.target as Node)) {
+      handleDismiss()
+    }
+  }
 
   useEffect(() => {
     const handleShow = (event: CustomEvent<RatingPopupData>) => {
@@ -56,9 +79,13 @@ export default function RatingPopup() {
   }
 
   return (
-    <div className='fixed inset-0 z-[9999] flex items-center justify-center pointer-events-none'>
+    <div
+      className='fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 cursor-pointer'
+      onClick={handleBackdropClick}
+    >
       <div
-        className='pointer-events-auto'
+        ref={popupRef}
+        className='cursor-default'
         style={{
           animation: 'bounceIn 0.5s ease-out',
         }}
@@ -130,13 +157,33 @@ export default function RatingPopup() {
               ))}
             </div>
 
-            {/* Bottom gradient overlay with title */}
+            {/* Bottom gradient overlay with title and play button */}
             <div
               className='absolute bottom-0 left-0 right-0 p-4 pt-16'
               style={{
                 background: `linear-gradient(to top, ${getRatingBgColor()}, transparent)`,
               }}
             >
+              {/* Play Trailer Button */}
+              <div className='flex justify-center mb-3'>
+                <Fab
+                  onClick={handlePlayTrailer}
+                  title='Play Trailer'
+                  aria-label='Play Trailer'
+                  sx={{
+                    bgcolor: 'rgba(255, 255, 255, 0.2)',
+                    backdropFilter: 'blur(4px)',
+                    '&:hover': {
+                      bgcolor: 'rgba(255, 255, 255, 0.3)',
+                      transform: 'scale(1.1)',
+                    },
+                    transition: 'all 0.2s ease-in-out',
+                    boxShadow: '0 4px 15px rgba(0,0,0,0.3)',
+                  }}
+                >
+                  <PlayArrowIcon sx={{ color: 'white', fontSize: 32 }} />
+                </Fab>
+              </div>
               <div className='text-white text-lg font-bebas font-normal text-center leading-tight drop-shadow-lg line-clamp-2'>
                 {ratingData.title}
                 {ratingData.year && (
