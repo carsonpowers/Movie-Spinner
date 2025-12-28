@@ -71,9 +71,13 @@ const calculateWheelLandingItem = (
   const velocity = Math.abs(initialAngularVelocity)
   const totalAngularDistance = (velocity * velocity) / (2 * angularDeceleration)
 
+  // Empirical velocity-proportional correction factor (~1.05% of initial velocity)
+  // Compensates for timing difference between onSpin event and actual spin start
+  const velocityCorrection = velocity * 0.0105
+
   // Apply direction of rotation
   const direction = initialAngularVelocity < 0 ? -1 : 1
-  const signedDistance = totalAngularDistance * direction
+  const signedDistance = (totalAngularDistance + velocityCorrection) * direction
 
   // Calculate final resting angle
   const finalRotation = initialAngle + signedDistance
