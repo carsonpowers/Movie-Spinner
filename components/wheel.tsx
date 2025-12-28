@@ -77,6 +77,8 @@ const calculateWheelLandingItem = (
   // Calculate final resting angle
   const finalRotation = initialAngle + signedDistance
 
+  console.log('🔧 Predicted final rotation:', finalRotation)
+
   // spin-wheel's formula for determining current index:
   // currentIndex = floor(((pointerAngle - rotation) mod 360) / itemAngleSize)
   // Default pointerAngle is 0 (pointing right/east/3 o'clock)
@@ -195,14 +197,36 @@ const initWheel = async (
 
   // Predict landing item when wheel starts spinning
   wheel.onSpin = (event: any) => {
+    console.log('📊 Spin event data:', event)
+    console.log('🔧 Current rotation (degrees):', extendedWheel.rotation)
+    console.log('🔧 Rotation speed (deg/s):', event.rotationSpeed)
+    console.log('🔧 Friction resistance:', wheel.rotationResistance)
+
+    const currentRotationDegrees = extendedWheel.rotation
+    const angularVelocityDegrees = event.rotationSpeed
+    const angularDeceleration = Math.abs(wheel.rotationResistance)
+    const itemCount = movies.length
+
+    console.log('🔧 Angular deceleration (deg/s²):', angularDeceleration)
+    console.log('🔧 Item count:', itemCount)
+
+    // Log item center angles for debugging
+    const items = extendedWheel.items
+    console.log('🔧 Item 0 center angle:', items[0]?.getCenterAngle())
+    console.log('🔧 Item 1 center angle:', items[1]?.getCenterAngle())
+    if (itemCount > 24) {
+      console.log('🔧 Item 24 center angle:', items[24]?.getCenterAngle())
+    }
+
     const predictedIndex = calculateWheelLandingItem(
-      extendedWheel.rotation,
-      event.rotationSpeed,
-      Math.abs(wheel.rotationResistance),
-      movies.length
+      currentRotationDegrees,
+      angularVelocityDegrees,
+      angularDeceleration,
+      itemCount
     )
 
-    console.log('🎯 Predicted movie:', movies[predictedIndex]?.title)
+    console.log('🎯 Predicted landing item:', predictedIndex)
+    console.log('🎬 Predicted movie:', movies[predictedIndex]?.title)
   }
 
   // Listen for friction changes
@@ -215,8 +239,10 @@ const initWheel = async (
   )
 }
 
-const onRest = ({ currentIndex }: WheelEvent) => {
-  console.log('🎬 Landed on:', moviesRef[currentIndex]?.title)
+const onRest = ({ currentIndex, rotation }: WheelEvent) => {
+  console.log('✅ Actual landing item:', currentIndex)
+  console.log('🎬 Actual movie:', moviesRef[currentIndex]?.title)
+  console.log('🔧 Final rotation (degrees):', rotation)
 
   if (lockWheel) releaseWheelLock(currentIndex)
   else {
