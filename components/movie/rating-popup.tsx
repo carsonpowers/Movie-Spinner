@@ -105,8 +105,8 @@ export default function RatingPopup() {
           <div
             className='relative overflow-hidden rounded-2xl shadow-2xl'
             style={{
-              width: 'calc(var(--item-size, 180px) * 1.5)',
-              height: 'calc(var(--item-size, 180px) * 1.481 * 1.5)',
+              width: 'min(80vw, 54vh)',
+              height: 'min(80vh, 118.5vw)',
               backgroundImage: ratingData.poster
                 ? `url(${ratingData.poster})`
                 : undefined,
@@ -120,27 +120,27 @@ export default function RatingPopup() {
           >
             {/* Rating Badge */}
             <div
-              className='absolute top-3 right-3 z-10 flex flex-col items-center justify-center rounded-full shadow-lg'
+              className='absolute top-6 right-6 z-10 flex flex-col items-center justify-center rounded-full shadow-lg'
               style={{
-                width: '70px',
-                height: '70px',
+                width: '120px',
+                height: '120px',
                 backgroundColor: getRatingBgColor(),
-                border: `3px solid ${getRatingBorderColor()}`,
+                border: `4px solid ${getRatingBorderColor()}`,
                 animation: 'pulse 1s ease-in-out infinite',
               }}
             >
-              <span className='text-white text-2xl font-bold leading-none'>
+              <span className='text-white text-5xl font-bold leading-none'>
                 {ratingData.rating}
               </span>
-              <span className='text-white/80 text-xs font-medium'>IMDB</span>
+              <span className='text-white/80 text-base font-medium'>IMDB</span>
             </div>
 
             {/* Star Rating */}
-            <div className='absolute top-3 left-3 z-10 flex gap-0.5'>
+            <div className='absolute top-6 left-6 z-10 flex gap-1'>
               {[...Array(10)].map((_, i) => (
                 <span
                   key={i}
-                  className={`text-lg drop-shadow-md ${
+                  className={`text-3xl drop-shadow-md ${
                     i < Math.round(ratingNum)
                       ? 'text-yellow-400'
                       : 'text-white/30'
@@ -159,18 +159,21 @@ export default function RatingPopup() {
 
             {/* Bottom gradient overlay with title and play button */}
             <div
-              className='absolute bottom-0 left-0 right-0 p-4 pt-16'
+              className='absolute bottom-0 left-0 right-0 p-8 pt-24'
               style={{
                 background: `linear-gradient(to top, ${getRatingBgColor()}, transparent)`,
               }}
             >
               {/* Play Trailer Button */}
-              <div className='flex justify-center mb-3'>
+              <div className='flex justify-center mb-6'>
                 <Fab
+                  size='large'
                   onClick={handlePlayTrailer}
                   title='Play Trailer'
                   aria-label='Play Trailer'
                   sx={{
+                    width: 80,
+                    height: 80,
                     bgcolor: 'rgba(255, 255, 255, 0.2)',
                     backdropFilter: 'blur(4px)',
                     '&:hover': {
@@ -181,10 +184,10 @@ export default function RatingPopup() {
                     boxShadow: '0 4px 15px rgba(0,0,0,0.3)',
                   }}
                 >
-                  <PlayArrowIcon sx={{ color: 'white', fontSize: 32 }} />
+                  <PlayArrowIcon sx={{ color: 'white', fontSize: 48 }} />
                 </Fab>
               </div>
-              <div className='text-white text-lg font-bebas font-normal text-center leading-tight drop-shadow-lg line-clamp-2'>
+              <div className='text-white text-3xl font-bebas font-normal text-center leading-tight drop-shadow-lg line-clamp-2'>
                 {ratingData.title}
                 {ratingData.year && (
                   <span className='text-white/80'> ({ratingData.year})</span>
