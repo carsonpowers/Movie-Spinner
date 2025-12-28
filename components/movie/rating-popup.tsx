@@ -1,23 +1,27 @@
 /**
  * Rating Popup Component
  * Displays the IMDB rating for 3 seconds after the wheel stops
+ * Uses a MovieListItem-style card with rating-based background color
  */
 
 'use client'
 
 import React, { useEffect, useState } from 'react'
+import Tilt from 'react-parallax-tilt'
 
-interface RatingPopupProps {
+interface RatingPopupData {
   rating: string
   title: string
+  poster?: string
+  year?: string
 }
 
 export default function RatingPopup() {
   const [isVisible, setIsVisible] = useState(false)
-  const [ratingData, setRatingData] = useState<RatingPopupProps | null>(null)
+  const [ratingData, setRatingData] = useState<RatingPopupData | null>(null)
 
   useEffect(() => {
-    const handleShow = (event: CustomEvent<RatingPopupProps>) => {
+    const handleShow = (event: CustomEvent<RatingPopupData>) => {
       setRatingData(event.detail)
       setIsVisible(true)
     }
@@ -39,51 +43,109 @@ export default function RatingPopup() {
 
   // Parse rating to determine color (green for good, yellow for average, red for bad)
   const ratingNum = parseFloat(ratingData.rating)
-  const getRatingColor = () => {
-    if (ratingNum >= 7) return 'from-green-500 to-emerald-600'
-    if (ratingNum >= 5) return 'from-yellow-500 to-amber-600'
-    return 'from-red-500 to-rose-600'
+  const getRatingBgColor = () => {
+    if (ratingNum >= 7) return 'rgba(22, 163, 74, 0.95)' // green-600
+    if (ratingNum >= 5) return 'rgba(202, 138, 4, 0.95)' // yellow-600
+    return 'rgba(220, 38, 38, 0.95)' // red-600
+  }
+
+  const getRatingBorderColor = () => {
+    if (ratingNum >= 7) return 'rgb(34, 197, 94)' // green-500
+    if (ratingNum >= 5) return 'rgb(234, 179, 8)' // yellow-500
+    return 'rgb(239, 68, 68)' // red-500
   }
 
   return (
     <div className='fixed inset-0 z-[9999] flex items-center justify-center pointer-events-none'>
       <div
-        className={`
-          animate-bounce-in
-          bg-gradient-to-br ${getRatingColor()}
-          rounded-3xl
-          shadow-2xl
-          p-8
-          text-center
-          transform
-          pointer-events-auto
-        `}
+        className='pointer-events-auto'
         style={{
-          animation:
-            'bounceIn 0.5s ease-out, pulse 1s ease-in-out 0.5s infinite',
+          animation: 'bounceIn 0.5s ease-out',
         }}
       >
-        <div className='text-white/80 text-lg font-medium mb-2 uppercase tracking-wider'>
-          IMDB Rating
-        </div>
-        <div className='text-white text-8xl font-bold mb-4 drop-shadow-lg'>
-          {ratingData.rating}
-        </div>
-        <div className='text-white/90 text-xl font-medium max-w-xs truncate'>
-          {ratingData.title}
-        </div>
-        <div className='mt-4 flex justify-center gap-1'>
-          {[...Array(10)].map((_, i) => (
-            <span
-              key={i}
-              className={`text-2xl ${
-                i < Math.round(ratingNum) ? 'text-yellow-300' : 'text-white/30'
-              }`}
+        <Tilt
+          tiltReverse={true}
+          scale={1.05}
+          tiltMaxAngleX={10}
+          tiltMaxAngleY={10}
+          glareEnable={true}
+          glareMaxOpacity={0.3}
+          glarePosition='all'
+          transitionSpeed={800}
+          transitionEasing='cubic-bezier(.03,.98,.52,.99)'
+          className='rounded-2xl overflow-hidden'
+        >
+          <div
+            className='relative overflow-hidden rounded-2xl shadow-2xl'
+            style={{
+              width: 'calc(var(--item-size, 180px) * 1.5)',
+              height: 'calc(var(--item-size, 180px) * 1.481 * 1.5)',
+              backgroundImage: ratingData.poster
+                ? `url(${ratingData.poster})`
+                : undefined,
+              backgroundPositionX: 'center',
+              backgroundPositionY: 'top',
+              backgroundSize: 'cover',
+              backgroundColor: ratingData.poster ? undefined : '#1f2937',
+              border: `4px solid ${getRatingBorderColor()}`,
+              boxShadow: `0 0 30px ${getRatingBorderColor()}, 0 25px 50px -12px rgba(0, 0, 0, 0.5)`,
+            }}
+          >
+            {/* Rating Badge */}
+            <div
+              className='absolute top-3 right-3 z-10 flex flex-col items-center justify-center rounded-full shadow-lg'
+              style={{
+                width: '70px',
+                height: '70px',
+                backgroundColor: getRatingBgColor(),
+                border: `3px solid ${getRatingBorderColor()}`,
+                animation: 'pulse 1s ease-in-out infinite',
+              }}
             >
-              ★
-            </span>
-          ))}
-        </div>
+              <span className='text-white text-2xl font-bold leading-none'>
+                {ratingData.rating}
+              </span>
+              <span className='text-white/80 text-xs font-medium'>IMDB</span>
+            </div>
+
+            {/* Star Rating */}
+            <div className='absolute top-3 left-3 z-10 flex gap-0.5'>
+              {[...Array(10)].map((_, i) => (
+                <span
+                  key={i}
+                  className={`text-lg drop-shadow-md ${
+                    i < Math.round(ratingNum)
+                      ? 'text-yellow-400'
+                      : 'text-white/30'
+                  }`}
+                  style={{
+                    animation:
+                      i < Math.round(ratingNum)
+                        ? `starPop 0.3s ease-out ${i * 0.05}s both`
+                        : undefined,
+                  }}
+                >
+                  ★
+                </span>
+              ))}
+            </div>
+
+            {/* Bottom gradient overlay with title */}
+            <div
+              className='absolute bottom-0 left-0 right-0 p-4 pt-16'
+              style={{
+                background: `linear-gradient(to top, ${getRatingBgColor()}, transparent)`,
+              }}
+            >
+              <div className='text-white text-lg font-bebas font-normal text-center leading-tight drop-shadow-lg line-clamp-2'>
+                {ratingData.title}
+                {ratingData.year && (
+                  <span className='text-white/80'> ({ratingData.year})</span>
+                )}
+              </div>
+            </div>
+          </div>
+        </Tilt>
       </div>
       <style jsx>{`
         @keyframes bounceIn {
@@ -95,7 +157,7 @@ export default function RatingPopup() {
             transform: scale(1.05);
           }
           70% {
-            transform: scale(0.9);
+            transform: scale(0.95);
           }
           100% {
             opacity: 1;
@@ -108,7 +170,17 @@ export default function RatingPopup() {
             transform: scale(1);
           }
           50% {
-            transform: scale(1.02);
+            transform: scale(1.05);
+          }
+        }
+        @keyframes starPop {
+          0% {
+            opacity: 0;
+            transform: scale(0);
+          }
+          100% {
+            opacity: 1;
+            transform: scale(1);
           }
         }
       `}</style>

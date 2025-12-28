@@ -350,11 +350,16 @@ const preloadMovieData = async (predictedIndex: number) => {
 /**
  * Shows a rating popup for 3 seconds, then resolves.
  */
-const showRatingPopup = (rating: string, title: string): Promise<void> => {
+const showRatingPopup = (
+  rating: string,
+  title: string,
+  poster?: string,
+  year?: string
+): Promise<void> => {
   return new Promise((resolve) => {
     // Dispatch event to show the rating popup
     const showEvent = new CustomEvent('showRatingPopup', {
-      detail: { rating, title },
+      detail: { rating, title, poster, year },
     })
     window.dispatchEvent(showEvent)
 
@@ -386,7 +391,12 @@ const playTrailerWithRating = async (currentIndex: number) => {
       'Rating:',
       preloadedMovieData.data.imdbRating
     )
-    await showRatingPopup(preloadedMovieData.data.imdbRating, movie.title)
+    await showRatingPopup(
+      preloadedMovieData.data.imdbRating,
+      movie.title,
+      preloadedMovieData.data.Poster,
+      preloadedMovieData.data.Year
+    )
     preloadedMovieData = null
   } else if (movie.id) {
     // Fallback: try to fetch movie data if not preloaded
@@ -400,7 +410,12 @@ const playTrailerWithRating = async (currentIndex: number) => {
           'Rating:',
           data.imdbRating
         )
-        await showRatingPopup(data.imdbRating, movie.title)
+        await showRatingPopup(
+          data.imdbRating,
+          movie.title,
+          data.Poster,
+          data.Year
+        )
       }
     } catch (error) {
       console.error('Failed to fetch movie data for rating:', error)
