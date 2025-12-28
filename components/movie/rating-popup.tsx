@@ -126,7 +126,6 @@ export default function RatingPopup() {
                 height: '120px',
                 backgroundColor: getRatingBgColor(),
                 border: `4px solid ${getRatingBorderColor()}`,
-                animation: 'pulse 1s ease-in-out infinite',
               }}
             >
               <span className='text-white text-5xl font-bold leading-none'>
@@ -135,7 +134,7 @@ export default function RatingPopup() {
               <span className='text-white/80 text-base font-medium'>IMDB</span>
             </div>
 
-            {/* Bottom gradient overlay with title and play button */}
+            {/* Bottom gradient overlay with play button */}
             <div
               className='absolute bottom-0 left-0 right-0 p-8 pt-24'
               style={{
@@ -143,7 +142,7 @@ export default function RatingPopup() {
               }}
             >
               {/* Play Trailer Button */}
-              <div className='flex justify-center mb-6'>
+              <div className='flex justify-center'>
                 <Fab
                   size='large'
                   onClick={handlePlayTrailer}
@@ -165,33 +164,6 @@ export default function RatingPopup() {
                   <PlayArrowIcon sx={{ color: 'white', fontSize: 48 }} />
                 </Fab>
               </div>
-              <div className='text-white text-3xl font-bebas font-normal text-center leading-tight drop-shadow-lg line-clamp-2'>
-                {ratingData.title}
-                {ratingData.year && (
-                  <span className='text-white/80'> ({ratingData.year})</span>
-                )}
-              </div>
-              {/* Star Rating */}
-              <div className='flex justify-center gap-1 mt-4'>
-                {[...Array(10)].map((_, i) => (
-                  <span
-                    key={i}
-                    className={`text-3xl drop-shadow-md ${
-                      i < Math.round(ratingNum)
-                        ? 'text-yellow-400'
-                        : 'text-white/30'
-                    }`}
-                    style={{
-                      animation:
-                        i < Math.round(ratingNum)
-                          ? `starPop 0.3s ease-out ${i * 0.05}s both`
-                          : undefined,
-                    }}
-                  >
-                    ★
-                  </span>
-                ))}
-              </div>
             </div>
           </div>
         </Tilt>
@@ -207,25 +179,6 @@ export default function RatingPopup() {
           }
           70% {
             transform: scale(0.95);
-          }
-          100% {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
-        @keyframes pulse {
-          0%,
-          100% {
-            transform: scale(1);
-          }
-          50% {
-            transform: scale(1.05);
-          }
-        }
-        @keyframes starPop {
-          0% {
-            opacity: 0;
-            transform: scale(0);
           }
           100% {
             opacity: 1;
