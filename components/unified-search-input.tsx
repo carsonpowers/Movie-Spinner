@@ -122,9 +122,7 @@ export default function UnifiedSearchInput({
       }
 
       // For add mode, do movie search with debouncing
-      if (debounceTimer.current) {
-        clearTimeout(debounceTimer.current)
-      }
+      if (debounceTimer.current) clearTimeout(debounceTimer.current)
 
       if (value.length < 1) {
         setOptions([])

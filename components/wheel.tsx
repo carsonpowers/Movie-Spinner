@@ -262,16 +262,12 @@ const onRest = ({ currentIndex, rotation }: WheelEvent) => {
 
 const makeARandomClickNoise = () => {
   const clicks = (document as ExtendedDocument).clicks
-  if (clicks) {
-    clicks[Math.round(Math.random() * 4)].play()
-  }
+  if (clicks) clicks[Math.round(Math.random() * 4)].play()
 }
 
 const playResultSound = () => {
   const audio = document.querySelector('#result audio') as HTMLAudioElement
-  if (audio) {
-    audio.play()
-  }
+  if (audio) audio.play()
 }
 
 /**
@@ -399,9 +395,7 @@ export const scrapeAndPlayTrailer = async (currentIndex: number) => {
 const releaseWheelLock = (currentIndex: number) => {
   lockWheel = false
   const wheel = (document as ExtendedDocument).wheelInstance
-  if (wheel) {
-    wheel.isInteractive = true
-  }
+  if (wheel) wheel.isInteractive = true
 }
 
 const rotateToCenterAndLockWheel = (currentIndex: number) => {
@@ -462,9 +456,7 @@ const getDirection = (currentIndex: number) => {
 
 const destroyWheel = () => {
   const wheel = (document as ExtendedDocument).wheelInstance
-  if (wheel) {
-    wheel.remove()
-  }
+  if (wheel) wheel.remove()
 }
 
 export default function Wheel({ movies }: { movies: Movie[] }) {

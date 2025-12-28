@@ -180,9 +180,7 @@ const MovieListItem = memo((movie: Movie) => {
       const success = await toggleWatched(id)
 
       // Revert on failure
-      if (!success) {
-        setOptimisticWatched(optimisticWatched)
-      }
+      if (!success) setOptimisticWatched(optimisticWatched)
     },
     [id, optimisticWatched, toggleWatched]
   )
@@ -195,9 +193,7 @@ const MovieListItem = memo((movie: Movie) => {
       setIsDeleting(true)
       const success = await deleteMovie(id, title)
 
-      if (!success) {
-        setIsDeleting(false)
-      }
+      if (!success) setIsDeleting(false)
     },
     [id, title, deleteMovie]
   )
@@ -363,9 +359,7 @@ const MovieTableRow = memo((movie: Movie) => {
     setOptimisticWatched(!optimisticWatched)
     const success = await toggleWatched(id)
 
-    if (!success) {
-      setOptimisticWatched(watched)
-    }
+    if (!success) setOptimisticWatched(watched)
   }, [id, optimisticWatched, watched, toggleWatched])
 
   const handleDelete = useCallback(async () => {

@@ -26,9 +26,7 @@ export default function AddMovieFab({
     setOpen(false)
   }
 
-  if (!userId) {
-    return null
-  }
+  if (!userId) return null
 
   return (
     <>
