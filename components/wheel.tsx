@@ -49,6 +49,51 @@ const itemConfig = {
 let lockWheel: boolean | undefined
 let moviesRef: Movie[] = []
 
+/**
+ * Calculates which wheel item the wheel will land on after spinning.
+ * Uses constant angular deceleration model and spin-wheel's index formula.
+ *
+ * @param initialAngle - Starting angle in degrees (θ₀)
+ * @param initialAngularVelocity - Starting angular velocity in deg/s (ω₀)
+ * @param angularDeceleration - Angular deceleration in deg/s² (α, positive value)
+ * @param itemCount - Number of items on the wheel (N)
+ * @returns Integer index from 0 to itemCount - 1 representing which wheel item will be landed on
+ */
+const calculateWheelLandingItem = (
+  initialAngle: number,
+  initialAngularVelocity: number,
+  angularDeceleration: number,
+  itemCount: number
+): number => {
+  // Calculate total angular distance traveled before stopping
+  // θ_total = ω₀² / (2α) - kinematic equation for constant deceleration
+  const velocity = Math.abs(initialAngularVelocity)
+  const totalAngularDistance = (velocity * velocity) / (2 * angularDeceleration)
+
+  // Apply direction of rotation
+  const direction = initialAngularVelocity < 0 ? -1 : 1
+  const signedDistance = totalAngularDistance * direction
+
+  // Calculate final resting angle
+  const finalRotation = initialAngle + signedDistance
+
+  console.log('🔧 Predicted final rotation:', finalRotation)
+
+  // spin-wheel's formula for determining current index:
+  // currentIndex = floor(((pointerAngle - rotation) mod 360) / itemAngleSize)
+  // Default pointerAngle is 0 (pointing right/east/3 o'clock)
+  const pointerAngle = 0
+  const itemAngleSize = 360 / itemCount
+
+  // Normalize the angle to [0, 360)
+  let normalizedAngle = (pointerAngle - finalRotation) % 360
+  if (normalizedAngle < 0) normalizedAngle += 360
+
+  const itemIndex = Math.floor(normalizedAngle / itemAngleSize)
+
+  return itemIndex
+}
+
 export const showWheel = () => {
   const wheelContainer = document.querySelector('#wheel')
   const movieListContainer = document.querySelector('#movie-list-container')
@@ -150,6 +195,40 @@ const initWheel = async (
   wheel.onRest = onRest
   wheel.onCurrentIndexChange = makeARandomClickNoise
 
+  // Predict landing item when wheel starts spinning
+  wheel.onSpin = (event: any) => {
+    console.log('📊 Spin event data:', event)
+    console.log('🔧 Current rotation (degrees):', extendedWheel.rotation)
+    console.log('🔧 Rotation speed (deg/s):', event.rotationSpeed)
+    console.log('🔧 Friction resistance:', wheel.rotationResistance)
+
+    const currentRotationDegrees = extendedWheel.rotation
+    const angularVelocityDegrees = event.rotationSpeed
+    const angularDeceleration = Math.abs(wheel.rotationResistance)
+    const itemCount = movies.length
+
+    console.log('🔧 Angular deceleration (deg/s²):', angularDeceleration)
+    console.log('🔧 Item count:', itemCount)
+
+    // Log item center angles for debugging
+    const items = extendedWheel.items
+    console.log('🔧 Item 0 center angle:', items[0]?.getCenterAngle())
+    console.log('🔧 Item 1 center angle:', items[1]?.getCenterAngle())
+    if (itemCount > 24) {
+      console.log('🔧 Item 24 center angle:', items[24]?.getCenterAngle())
+    }
+
+    const predictedIndex = calculateWheelLandingItem(
+      currentRotationDegrees,
+      angularVelocityDegrees,
+      angularDeceleration,
+      itemCount
+    )
+
+    console.log('🎯 Predicted landing item:', predictedIndex)
+    console.log('🎬 Predicted movie:', movies[predictedIndex]?.title)
+  }
+
   // Listen for friction changes
   const handleFrictionChange = (event: CustomEvent) => {
     wheel.rotationResistance = event.detail
@@ -160,7 +239,11 @@ const initWheel = async (
   )
 }
 
-const onRest = ({ currentIndex }: WheelEvent) => {
+const onRest = ({ currentIndex, rotation }: WheelEvent) => {
+  console.log('✅ Actual landing item:', currentIndex)
+  console.log('🎬 Actual movie:', moviesRef[currentIndex]?.title)
+  console.log('🔧 Final rotation (degrees):', rotation)
+
   if (lockWheel) releaseWheelLock(currentIndex)
   else {
     rotateToCenterAndLockWheel(currentIndex)
