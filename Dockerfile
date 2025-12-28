@@ -23,6 +23,17 @@ COPY . .
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Dummy env vars for build time (real values provided at runtime)
+ENV FIREBASE_PROJECT_ID=placeholder
+ENV FIREBASE_CLIENT_EMAIL=placeholder@placeholder.iam.gserviceaccount.com
+ENV FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nplaceholder\n-----END PRIVATE KEY-----"
+ENV FIREBASE_STORAGE_BUCKET=placeholder.appspot.com
+
+# Auth Firebase env vars (used by NextAuth FirestoreAdapter)
+ENV AUTH_FIREBASE_PROJECT_ID=placeholder
+ENV AUTH_FIREBASE_CLIENT_EMAIL=placeholder@placeholder.iam.gserviceaccount.com
+ENV AUTH_FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nplaceholder\n-----END PRIVATE KEY-----"
+
 # Build the application
 RUN npm run build
 
