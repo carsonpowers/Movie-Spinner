@@ -135,28 +135,6 @@ export default function RatingPopup() {
               <span className='text-white/80 text-base font-medium'>IMDB</span>
             </div>
 
-            {/* Star Rating */}
-            <div className='absolute top-6 left-6 z-10 flex gap-1'>
-              {[...Array(10)].map((_, i) => (
-                <span
-                  key={i}
-                  className={`text-3xl drop-shadow-md ${
-                    i < Math.round(ratingNum)
-                      ? 'text-yellow-400'
-                      : 'text-white/30'
-                  }`}
-                  style={{
-                    animation:
-                      i < Math.round(ratingNum)
-                        ? `starPop 0.3s ease-out ${i * 0.05}s both`
-                        : undefined,
-                  }}
-                >
-                  ★
-                </span>
-              ))}
-            </div>
-
             {/* Bottom gradient overlay with title and play button */}
             <div
               className='absolute bottom-0 left-0 right-0 p-8 pt-24'
@@ -192,6 +170,27 @@ export default function RatingPopup() {
                 {ratingData.year && (
                   <span className='text-white/80'> ({ratingData.year})</span>
                 )}
+              </div>
+              {/* Star Rating */}
+              <div className='flex justify-center gap-1 mt-4'>
+                {[...Array(10)].map((_, i) => (
+                  <span
+                    key={i}
+                    className={`text-3xl drop-shadow-md ${
+                      i < Math.round(ratingNum)
+                        ? 'text-yellow-400'
+                        : 'text-white/30'
+                    }`}
+                    style={{
+                      animation:
+                        i < Math.round(ratingNum)
+                          ? `starPop 0.3s ease-out ${i * 0.05}s both`
+                          : undefined,
+                    }}
+                  >
+                    ★
+                  </span>
+                ))}
               </div>
             </div>
           </div>
