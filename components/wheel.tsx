@@ -267,7 +267,7 @@ const makeARandomClickNoise = () => {
 
 const playResultSound = () => {
   const audio = document.querySelector('#result audio') as HTMLAudioElement
-  if (audio) audio.play()
+  audio?.play?.()
 }
 
 /**
