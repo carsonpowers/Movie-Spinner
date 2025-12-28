@@ -60,13 +60,13 @@ jobs:
       - name: Run tests
         run: bun test
 
-      - name: Upload coverage
-        uses: codecov/codecov-action@v4
-        if: always()
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./coverage/coverage-final.json
-          fail_ci_if_error: false
+      # - name: Upload coverage
+      #   uses: codecov/codecov-action@v4
+      #   if: always()
+      #   with:
+      #     token: ${{ secrets.CODECOV_TOKEN }}
+      #     files: ./coverage/coverage-final.json
+      #     fail_ci_if_error: false
 
   # ============================================
   # Build and Push Docker Image
