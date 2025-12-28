@@ -258,7 +258,7 @@ const onRest = ({ currentIndex, rotation }: WheelEvent) => {
   if (lockWheel) releaseWheelLock(currentIndex)
   else {
     rotateToCenterAndLockWheel(currentIndex)
-    playResultSound()
+    // playResultSound()
     playTrailerWithRating(currentIndex)
   }
 }
