@@ -61,10 +61,6 @@ export default function SettingsFab() {
   ) => {
     const friction = Array.isArray(value) ? value[0] : value
     setWheelFriction(friction)
-    // Dispatch event for wheel component (still needs this for the wheel library)
-    window.dispatchEvent(
-      new CustomEvent('wheelFrictionChange', { detail: -friction })
-    )
   }
 
   return (

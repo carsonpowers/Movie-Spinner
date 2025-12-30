@@ -6,34 +6,28 @@
 
 'use client'
 
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useRef } from 'react'
 import Tilt from 'react-parallax-tilt'
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 import Fab from '@mui/material/Fab'
-
-interface RatingPopupData {
-  rating: string
-  title: string
-  poster?: string
-  year?: string
-}
+import { useRatingPopupStore } from '@/lib/stores'
 
 export default function RatingPopup() {
-  const [isVisible, setIsVisible] = useState(false)
-  const [ratingData, setRatingData] = useState<RatingPopupData | null>(null)
+  const {
+    isVisible,
+    data: ratingData,
+    hidePopup,
+    triggerPlayTrailer,
+  } = useRatingPopupStore()
   const popupRef = useRef<HTMLDivElement>(null)
 
   const handleDismiss = () => {
-    setIsVisible(false)
-    const hideEvent = new CustomEvent('hideRatingPopup')
-    window.dispatchEvent(hideEvent)
+    hidePopup()
   }
 
   const handlePlayTrailer = (e: React.MouseEvent) => {
     e.stopPropagation()
-    setIsVisible(false)
-    const playEvent = new CustomEvent('playTrailerFromPopup')
-    window.dispatchEvent(playEvent)
+    triggerPlayTrailer()
   }
 
   const handleBackdropClick = (e: React.MouseEvent) => {
@@ -42,25 +36,6 @@ export default function RatingPopup() {
       handleDismiss()
     }
   }
-
-  useEffect(() => {
-    const handleShow = (event: CustomEvent<RatingPopupData>) => {
-      setRatingData(event.detail)
-      setIsVisible(true)
-    }
-
-    const handleHide = () => {
-      setIsVisible(false)
-    }
-
-    window.addEventListener('showRatingPopup', handleShow as EventListener)
-    window.addEventListener('hideRatingPopup', handleHide as EventListener)
-
-    return () => {
-      window.removeEventListener('showRatingPopup', handleShow as EventListener)
-      window.removeEventListener('hideRatingPopup', handleHide as EventListener)
-    }
-  }, [])
 
   if (!isVisible || !ratingData) return null
 

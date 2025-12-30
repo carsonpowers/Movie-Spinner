@@ -9,7 +9,7 @@ import { Wheel as WheelLib, type WheelItem as SpinWheelItem } from 'spin-wheel'
 import React, { useEffect, useRef, useMemo } from 'react'
 import { easeOutElastic } from 'easing-utils'
 import type { OMDBMovieData } from '@/types/omdb'
-import { useUIStore } from '@/lib/stores'
+import { useUIStore, useSnackbarStore, useRatingPopupStore } from '@/lib/stores'
 
 interface Movie {
   id?: string
@@ -241,14 +241,17 @@ const initWheel = async (
     preloadMovieData(predictedIndex)
   }
 
-  // Listen for friction changes
-  const handleFrictionChange = (event: CustomEvent) => {
-    wheel.rotationResistance = event.detail
-  }
-  window.addEventListener(
-    'wheelFrictionChange',
-    handleFrictionChange as EventListener
-  )
+  // Subscribe to friction changes from the UI store
+  let prevFriction = useUIStore.getState().wheelFriction
+  const unsubscribeFriction = useUIStore.subscribe((state) => {
+    if (state.wheelFriction !== prevFriction) {
+      prevFriction = state.wheelFriction
+      wheel.rotationResistance = -state.wheelFriction
+    }
+  })
+
+  // Store unsubscribe function for cleanup (attached to wheel instance)
+  ;(wheel as any)._unsubscribeFriction = unsubscribeFriction
 }
 
 const onRest = ({ currentIndex, rotation }: WheelEvent) => {
@@ -359,29 +362,25 @@ const showRatingPopup = (
   year?: string
 ): Promise<boolean> => {
   return new Promise((resolve) => {
-    const handlePlay = () => {
-      cleanup()
-      resolve(true)
-    }
+    const store = useRatingPopupStore.getState()
 
-    const handleDismiss = () => {
-      cleanup()
-      resolve(false)
-    }
-
-    const cleanup = () => {
-      window.removeEventListener('playTrailerFromPopup', handlePlay)
-      window.removeEventListener('hideRatingPopup', handleDismiss)
-    }
-
-    window.addEventListener('playTrailerFromPopup', handlePlay)
-    window.addEventListener('hideRatingPopup', handleDismiss)
-
-    // Dispatch event to show the rating popup
-    const showEvent = new CustomEvent('showRatingPopup', {
-      detail: { rating, title, poster, year },
+    // Subscribe to store changes
+    const unsubscribe = useRatingPopupStore.subscribe((state, prevState) => {
+      // Check if popup was hidden (dismissed)
+      if (prevState.isVisible && !state.isVisible && !state.shouldPlayTrailer) {
+        unsubscribe()
+        resolve(false)
+      }
+      // Check if play trailer was triggered
+      if (state.shouldPlayTrailer) {
+        unsubscribe()
+        store.resetPlayTrailer()
+        resolve(true)
+      }
     })
-    window.dispatchEvent(showEvent)
+
+    // Show the popup
+    store.showPopup({ rating, title, poster, year })
   })
 }
 
@@ -447,6 +446,7 @@ export const scrapeAndPlayTrailer = async (currentIndex: number) => {
   const movie = moviesRef[currentIndex]
   if (!movie?.id) return
 
+  const showSnackbar = useSnackbarStore.getState().showSnackbar
   const videoPlayer = document.getElementById(
     'trailer-player'
   ) as HTMLVideoElement
@@ -458,13 +458,7 @@ export const scrapeAndPlayTrailer = async (currentIndex: number) => {
       videoPlayer.style.display = 'block'
       videoPlayer.play().catch((err) => {
         console.error('Error playing video:', err)
-        const event = new CustomEvent('showSnackbar', {
-          detail: {
-            message: 'Failed to play video',
-            severity: 'error',
-          },
-        })
-        window.dispatchEvent(event)
+        showSnackbar('Failed to play video', 'error')
       })
 
       videoPlayer.onended = () => {
@@ -482,16 +476,12 @@ export const scrapeAndPlayTrailer = async (currentIndex: number) => {
     const data = await response.json()
 
     if (data.error) {
-      const event = new CustomEvent('showSnackbar', {
-        detail: {
-          message:
-            data.error === 'No video found'
-              ? 'No trailer found for this movie'
-              : 'Failed to load trailer',
-          severity: 'warning',
-        },
-      })
-      window.dispatchEvent(event)
+      showSnackbar(
+        data.error === 'No video found'
+          ? 'No trailer found for this movie'
+          : 'Failed to load trailer',
+        'warning'
+      )
       return
     }
 
@@ -500,13 +490,7 @@ export const scrapeAndPlayTrailer = async (currentIndex: number) => {
       videoPlayer.style.display = 'block'
       videoPlayer.play().catch((err) => {
         console.error('Error playing video:', err)
-        const event = new CustomEvent('showSnackbar', {
-          detail: {
-            message: 'Failed to play video',
-            severity: 'error',
-          },
-        })
-        window.dispatchEvent(event)
+        showSnackbar('Failed to play video', 'error')
       })
 
       videoPlayer.onended = () => {
@@ -515,13 +499,7 @@ export const scrapeAndPlayTrailer = async (currentIndex: number) => {
     }
   } catch (error) {
     console.error('Failed to fetch trailer:', error)
-    const event = new CustomEvent('showSnackbar', {
-      detail: {
-        message: 'Failed to fetch trailer',
-        severity: 'error',
-      },
-    })
-    window.dispatchEvent(event)
+    showSnackbar('Failed to fetch trailer', 'error')
   }
 }
 
@@ -589,7 +567,13 @@ const getDirection = (currentIndex: number) => {
 
 const destroyWheel = () => {
   const wheel = (document as ExtendedDocument).wheelInstance
-  if (wheel) wheel.remove()
+  if (wheel) {
+    // Unsubscribe from store if subscription exists
+    if ((wheel as any)._unsubscribeFriction) {
+      ;(wheel as any)._unsubscribeFriction()
+    }
+    wheel.remove()
+  }
 }
 
 export default function Wheel({ movies }: { movies: Movie[] }) {

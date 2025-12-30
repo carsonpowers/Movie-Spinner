@@ -11,6 +11,7 @@ import SettingsFab from '@/components/fabs/settings-fab'
 import SpinFab from '@/components/fabs/spin-fab'
 import FilterFab from '@/components/fabs/filter-fab'
 import AddMovieFab from '@/components/fabs/add-movie-fab'
+import { useUIStore } from '@/lib/stores'
 
 interface RightSideMenuProps {
   userId?: string
@@ -21,7 +22,7 @@ export default function RightSideMenu({
   userId,
   movieCount = 0,
 }: RightSideMenuProps) {
-  const [isWheelVisible, setIsWheelVisible] = useState(false)
+  const isWheelVisible = useUIStore((state) => state.isWheelVisible)
   const [isNear, setIsNear] = useState(false)
   const [isTouchDevice, setIsTouchDevice] = useState(false)
 
@@ -35,22 +36,6 @@ export default function RightSideMenu({
       )
     }
     checkTouchDevice()
-
-    const handleWheelVisibility = (event: CustomEvent) => {
-      setIsWheelVisible(event.detail === 'wheel')
-    }
-
-    window.addEventListener(
-      'wheelVisibilityChange',
-      handleWheelVisibility as EventListener
-    )
-
-    return () => {
-      window.removeEventListener(
-        'wheelVisibilityChange',
-        handleWheelVisibility as EventListener
-      )
-    }
   }, [])
 
   return (
