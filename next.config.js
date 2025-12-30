@@ -30,12 +30,14 @@ const nextConfig = {
   // Performance optimizations
   experimental: {
     optimizePackageImports: ['react-parallax-tilt'],
-    turbo: {
-      rules: {
-        '*.svg': {
-          loaders: ['@svgr/webpack'],
-          as: '*.js',
-        },
+  },
+
+  // Turbopack configuration (moved from experimental.turbo in Next.js 15+)
+  turbopack: {
+    rules: {
+      '*.svg': {
+        loaders: ['@svgr/webpack'],
+        as: '*.js',
       },
     },
   },
