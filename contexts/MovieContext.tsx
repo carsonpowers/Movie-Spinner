@@ -1,39 +1,20 @@
 /**
  * Movie Context - Centralized State Management
- * Supports both authenticated users (server) and anonymous users (localStorage)
+ * Supports both authenticated users (server) and anonymous users (Zustand store)
  */
 
 'use client'
 
-import {
-  createContext,
-  useContext,
-  useCallback,
-  ReactNode,
-  useState,
-  useEffect,
-} from 'react'
+import { createContext, useContext, useCallback, ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
-import {
-  getLocalMovies,
-  addLocalMovie,
-  deleteLocalMovie,
-  toggleLocalMovieWatched,
-  saveLocalMovies,
-  localMovieToMovie,
-  type LocalMovie,
-} from '@/lib/local-storage'
+import { useMovieStore, useSnackbarStore } from '@/lib/stores'
 import type { Movie } from '@/lib/firebase/firestore'
 
-interface SnackbarState {
-  open: boolean
-  message: string
-  severity: 'error' | 'warning' | 'info' | 'success'
-}
+type Severity = 'error' | 'warning' | 'info' | 'success'
 
 interface MovieContextType {
   refresh: () => void
-  showSnackbar: (message: string, severity: SnackbarState['severity']) => void
+  showSnackbar: (message: string, severity: Severity) => void
   // Anonymous user support
   isAnonymous: boolean
   localMovies: Movie[]
@@ -45,14 +26,13 @@ interface MovieContextType {
   }) => Movie
   deleteMovieLocal: (movieId: string) => boolean
   toggleWatchedLocal: (movieId: string) => boolean | null
-  refreshLocalMovies: () => void
 }
 
 const MovieContext = createContext<MovieContextType | undefined>(undefined)
 
 interface MovieProviderProps {
   children: ReactNode
-  onSnackbar: (message: string, severity: SnackbarState['severity']) => void
+  onSnackbar: (message: string, severity: Severity) => void
   userId?: string
 }
 
@@ -62,34 +42,27 @@ export function MovieProvider({
   userId,
 }: MovieProviderProps) {
   const router = useRouter()
-  const [localMovies, setLocalMovies] = useState<Movie[]>([])
-  const isAnonymous = !userId
+  const {
+    localMovies: storeMovies,
+    addMovie,
+    deleteMovie,
+    toggleWatched,
+    getMoviesAsMovieType,
+  } = useMovieStore()
 
-  // Load local movies on mount
-  useEffect(() => {
-    if (isAnonymous) {
-      const movies = getLocalMovies()
-      setLocalMovies(movies.map((m) => localMovieToMovie(m)))
-    }
-  }, [isAnonymous])
+  const isAnonymous = !userId
+  const localMovies = getMoviesAsMovieType()
 
   const refresh = useCallback(() => {
     router.refresh()
   }, [router])
 
   const showSnackbar = useCallback(
-    (message: string, severity: SnackbarState['severity']) => {
+    (message: string, severity: Severity) => {
       onSnackbar(message, severity)
     },
     [onSnackbar]
   )
-
-  const refreshLocalMovies = useCallback(() => {
-    const movies = getLocalMovies()
-    setLocalMovies(movies.map((m) => localMovieToMovie(m)))
-    // Dispatch event to notify other components
-    window.dispatchEvent(new CustomEvent('localMoviesUpdated'))
-  }, [])
 
   const addMovieLocal = useCallback(
     (movie: {
@@ -98,38 +71,40 @@ export function MovieProvider({
       poster?: string
       imdbId?: string
     }): Movie => {
-      const newMovie = addLocalMovie({
+      const newMovie = addMovie({
         title: movie.title,
         year: movie.year,
         poster: movie.poster,
         imdbId: movie.imdbId,
       })
-      refreshLocalMovies()
-      return localMovieToMovie(newMovie)
+      return {
+        id: newMovie.id,
+        userId: 'anonymous',
+        title: newMovie.title,
+        poster: newMovie.poster,
+        imdbId: newMovie.imdbId,
+        year: newMovie.year,
+        watched: newMovie.watched,
+        createdAt: newMovie.createdAt,
+        updatedAt: newMovie.updatedAt,
+        addedAt: newMovie.addedAt,
+      }
     },
-    [refreshLocalMovies]
+    [addMovie]
   )
 
   const deleteMovieLocal = useCallback(
     (movieId: string): boolean => {
-      const result = deleteLocalMovie(movieId)
-      if (result) {
-        refreshLocalMovies()
-      }
-      return result
+      return deleteMovie(movieId)
     },
-    [refreshLocalMovies]
+    [deleteMovie]
   )
 
   const toggleWatchedLocal = useCallback(
     (movieId: string): boolean | null => {
-      const result = toggleLocalMovieWatched(movieId)
-      if (result !== null) {
-        refreshLocalMovies()
-      }
-      return result
+      return toggleWatched(movieId)
     },
-    [refreshLocalMovies]
+    [toggleWatched]
   )
 
   return (
@@ -142,7 +117,6 @@ export function MovieProvider({
         addMovieLocal,
         deleteMovieLocal,
         toggleWatchedLocal,
-        refreshLocalMovies,
       }}
     >
       {children}

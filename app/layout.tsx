@@ -7,7 +7,7 @@ import type { Metadata, Viewport } from 'next'
 import { Inter, Bebas_Neue } from 'next/font/google'
 import './globals.css'
 import MuiThemeProvider from '@/components/providers/mui-theme-provider'
-import { SnackbarProvider } from '@/contexts/SnackbarContext'
+import GlobalSnackbar from '@/components/common/global-snackbar'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -71,7 +71,8 @@ export default function RootLayout({
       </head>
       <body className='overflow-hidden text-white bg-black bg-crosshatch bg-cover bg-repeat'>
         <MuiThemeProvider>
-          <SnackbarProvider>{children}</SnackbarProvider>
+          {children}
+          <GlobalSnackbar />
         </MuiThemeProvider>
       </body>
     </html>

@@ -6,9 +6,10 @@
 'use client'
 
 import { Wheel as WheelLib, type WheelItem as SpinWheelItem } from 'spin-wheel'
-import React, { useEffect, useRef, useState, useMemo } from 'react'
+import React, { useEffect, useRef, useMemo } from 'react'
 import { easeOutElastic } from 'easing-utils'
 import type { OMDBMovieData } from '@/types/omdb'
+import { useUIStore } from '@/lib/stores'
 
 interface Movie {
   id?: string
@@ -593,10 +594,7 @@ const destroyWheel = () => {
 
 export default function Wheel({ movies }: { movies: Movie[] }) {
   const wheelContainer = useRef<HTMLDivElement | null>(null)
-  const [filterText, setFilterText] = useState('')
-  const [watchedFilter, setWatchedFilter] = useState<
-    'all' | 'hideWatched' | 'onlyWatched'
-  >('all')
+  const { filterText, watchedFilter } = useUIStore()
 
   // Filter movies based on filter text and watched status
   const filteredMovies = useMemo(
@@ -615,33 +613,6 @@ export default function Wheel({ movies }: { movies: Movie[] }) {
       }),
     [movies, watchedFilter, filterText]
   )
-
-  useEffect(() => {
-    const handleFilterMovies = (event: CustomEvent) => {
-      setFilterText(event.detail)
-    }
-
-    const handleWatchedFilterChange = (event: CustomEvent) => {
-      setWatchedFilter(event.detail)
-    }
-
-    window.addEventListener('filterMovies', handleFilterMovies as EventListener)
-    window.addEventListener(
-      'watchedFilterChange',
-      handleWatchedFilterChange as EventListener
-    )
-
-    return () => {
-      window.removeEventListener(
-        'filterMovies',
-        handleFilterMovies as EventListener
-      )
-      window.removeEventListener(
-        'watchedFilterChange',
-        handleWatchedFilterChange as EventListener
-      )
-    }
-  }, [])
 
   useEffect(() => {
     if (filteredMovies.length > 0) {

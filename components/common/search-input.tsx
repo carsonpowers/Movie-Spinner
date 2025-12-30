@@ -9,8 +9,7 @@ import Autocomplete from '@mui/material/Autocomplete'
 import CircularProgress from '@mui/material/CircularProgress'
 import Paper from '@mui/material/Paper'
 import ClickAwayListener from '@mui/material/ClickAwayListener'
-import { useSnackbar } from '@/contexts/SnackbarContext'
-import { addLocalMovie } from '@/lib/local-storage'
+import { useSnackbarStore, useUIStore, useMovieStore } from '@/lib/stores'
 
 interface Movie {
   id?: string
@@ -67,19 +66,23 @@ const addMovie = async (
   movie: Movie,
   imdbId: string,
   userId: string | undefined,
+  addMovieToStore: (movie: {
+    title: string
+    year?: string
+    poster?: string
+    imdbId?: string
+  }) => void,
   onSuccess?: () => void
 ) => {
-  // For anonymous users, save to localStorage
+  // For anonymous users, save to Zustand store
   if (!userId) {
-    addLocalMovie({
+    addMovieToStore({
       title: movie.title,
       year: movie.year,
       poster: movie.poster,
       imdbId: imdbId,
     })
     onSuccess?.()
-    // Dispatch event to notify components
-    window.dispatchEvent(new CustomEvent('localMoviesUpdated'))
     return
   }
 
@@ -112,7 +115,9 @@ export default function UnifiedSearchInput({
   const [options, setOptions] = useState<readonly Movie[]>([])
   const [loading, setLoading] = useState(false)
   const [inputValue, setInputValue] = useState('')
-  const { showSnackbar } = useSnackbar()
+  const showSnackbar = useSnackbarStore((state) => state.showSnackbar)
+  const setFilterText = useUIStore((state) => state.setFilterText)
+  const addMovieToStore = useMovieStore((state) => state.addMovie)
 
   const searchCache = useRef<Map<string, Movie[]>>(new Map())
   const debounceTimer = useRef<NodeJS.Timeout | null>(null)
@@ -131,10 +136,8 @@ export default function UnifiedSearchInput({
       setInputValue(value)
 
       if (mode === 'filter') {
-        // For filter mode, dispatch event immediately
-        window.dispatchEvent(
-          new CustomEvent('filterMovies', { detail: value.toLowerCase() })
-        )
+        // For filter mode, update the store directly
+        setFilterText(value.toLowerCase())
         return
       }
 
@@ -176,7 +179,7 @@ export default function UnifiedSearchInput({
         }
       }, 300)
     },
-    [mode]
+    [mode, setFilterText]
   )
 
   const handleChange = async (
@@ -186,11 +189,17 @@ export default function UnifiedSearchInput({
     if (!value || mode !== 'add') return
 
     try {
-      await addMovie(value, value.imdbID || value.title, userId, () => {
-        showSnackbar(`"${value.title}" has been added!`, 'success')
-        router.refresh()
-        onClose()
-      })
+      await addMovie(
+        value,
+        value.imdbID || value.title,
+        userId,
+        addMovieToStore,
+        () => {
+          showSnackbar(`"${value.title}" has been added!`, 'success')
+          router.refresh()
+          onClose()
+        }
+      )
     } catch (error) {
       showSnackbar('Failed to add movie. Please try again.', 'error')
     }
@@ -199,7 +208,7 @@ export default function UnifiedSearchInput({
   const handleClear = () => {
     setInputValue('')
     if (mode === 'filter') {
-      window.dispatchEvent(new CustomEvent('filterMovies', { detail: '' }))
+      setFilterText('')
     }
   }
 

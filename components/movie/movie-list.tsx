@@ -20,7 +20,7 @@ import TableRow from '@mui/material/TableRow'
 import Paper from '@mui/material/Paper'
 import VideoPlayer from './video-player'
 import MovieListItem, { Movie } from './movie-list-item'
-import { useSnackbar } from '@/contexts/SnackbarContext'
+import { useUIStore, useSnackbarStore } from '@/lib/stores'
 
 const MovieList = ({ children }: { children: React.ReactNode }) => (
   <ul
@@ -163,33 +163,8 @@ const MovieTableRow = memo((movie: Movie) => {
 MovieTableRow.displayName = 'MovieTableRow'
 
 function UIContent({ movies, userId }: { movies: Movie[]; userId?: string }) {
-  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid')
-  const [filterText, setFilterText] = useState('')
-  const [watchedFilter, setWatchedFilter] = useState<
-    'all' | 'hideWatched' | 'onlyWatched'
-  >('all')
-  const { showSnackbar } = useSnackbar()
-
-  // Memoize event handlers to prevent recreation
-  const handleViewChange = useCallback((event: CustomEvent) => {
-    setViewMode(event.detail)
-  }, [])
-
-  const handleFilterMovies = useCallback((event: CustomEvent) => {
-    setFilterText(event.detail)
-  }, [])
-
-  const handleWatchedFilterChange = useCallback((event: CustomEvent) => {
-    setWatchedFilter(event.detail)
-  }, [])
-
-  const handleShowSnackbar = useCallback(
-    (event: CustomEvent) => {
-      const { message, severity } = event.detail
-      showSnackbar(message, severity)
-    },
-    [showSnackbar]
-  )
+  const { viewMode, filterText, watchedFilter } = useUIStore()
+  const showSnackbar = useSnackbarStore((state) => state.showSnackbar)
 
   // Filter movies based on title, year, and watched status
   const filteredMovies = useMemo(
@@ -211,44 +186,7 @@ function UIContent({ movies, userId }: { movies: Movie[]; userId?: string }) {
 
   useEffect(() => {
     ;(document as any).flips = [...document.querySelectorAll('#flips > audio')]
-
-    window.addEventListener('viewChange', handleViewChange as EventListener)
-    window.addEventListener('filterMovies', handleFilterMovies as EventListener)
-    window.addEventListener(
-      'watchedFilterChange',
-      handleWatchedFilterChange as EventListener
-    )
-    window.addEventListener('showSnackbar', handleShowSnackbar as EventListener)
-
-    return () => {
-      window.removeEventListener(
-        'viewChange',
-        handleViewChange as EventListener
-      )
-      window.removeEventListener(
-        'filterMovies',
-        handleFilterMovies as EventListener
-      )
-      window.removeEventListener(
-        'watchedFilterChange',
-        handleWatchedFilterChange as EventListener
-      )
-      window.removeEventListener(
-        'showSnackbar',
-        handleShowSnackbar as EventListener
-      )
-    }
-  }, [
-    handleViewChange,
-    handleFilterMovies,
-    handleWatchedFilterChange,
-    handleShowSnackbar,
-  ])
-
-  // Sync viewMode changes back to settings
-  useEffect(() => {
-    window.dispatchEvent(new CustomEvent('viewModeSync', { detail: viewMode }))
-  }, [viewMode])
+  }, [])
 
   return (
     <>
@@ -361,7 +299,7 @@ export default function UI({
   movies: Movie[]
   userId?: string
 }) {
-  const { showSnackbar } = useSnackbar()
+  const showSnackbar = useSnackbarStore((state) => state.showSnackbar)
 
   return (
     <MovieProvider onSnackbar={showSnackbar} userId={userId}>

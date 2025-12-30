@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Fab from '@mui/material/Fab'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
@@ -12,78 +12,21 @@ import Checkbox from '@mui/material/Checkbox'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Divider from '@mui/material/Divider'
 import SettingsIcon from '@mui/icons-material/Settings'
+import { useUIStore } from '@/lib/stores'
 
 export default function SettingsFab() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
-  const [movieSize, setMovieSize] = useState(11) // Default 11rem
-  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid')
-  const [isWheelVisible, setIsWheelVisible] = useState(false)
-  const [watchedFilter, setWatchedFilter] = useState<
-    'all' | 'hideWatched' | 'onlyWatched'
-  >('all')
-  const [wheelFriction, setWheelFriction] = useState(40) // Default friction (absolute value)
 
-  useEffect(() => {
-    // Load saved movie size from localStorage
-    const savedSize = localStorage.getItem('movieSize')
-    if (savedSize) {
-      const size = parseFloat(savedSize)
-      setMovieSize(size)
-      document.documentElement.style.setProperty('--item-size', `${size}rem`)
-    }
-
-    // Load watched filter preference
-    const savedFilter = localStorage.getItem('watchedFilter') as
-      | 'all'
-      | 'hideWatched'
-      | 'onlyWatched'
-    if (
-      savedFilter &&
-      ['all', 'hideWatched', 'onlyWatched'].includes(savedFilter)
-    ) {
-      setWatchedFilter(savedFilter)
-      window.dispatchEvent(
-        new CustomEvent('watchedFilterChange', { detail: savedFilter })
-      )
-    }
-
-    // Load wheel friction preference
-    const savedFriction = localStorage.getItem('wheelFriction')
-    if (savedFriction) {
-      const friction = Math.abs(parseFloat(savedFriction))
-      setWheelFriction(friction)
-      window.dispatchEvent(
-        new CustomEvent('wheelFrictionChange', { detail: -friction })
-      )
-    }
-
-    // Listen for view mode changes
-    const handleViewModeSync = (event: CustomEvent) => {
-      setViewMode(event.detail)
-    }
-
-    // Listen for wheel visibility changes
-    const handleWheelVisibility = (event: CustomEvent) => {
-      setIsWheelVisible(event.detail === 'wheel')
-    }
-
-    window.addEventListener('viewModeSync', handleViewModeSync as EventListener)
-    window.addEventListener(
-      'wheelVisibilityChange',
-      handleWheelVisibility as EventListener
-    )
-
-    return () => {
-      window.removeEventListener(
-        'viewModeSync',
-        handleViewModeSync as EventListener
-      )
-      window.removeEventListener(
-        'wheelVisibilityChange',
-        handleWheelVisibility as EventListener
-      )
-    }
-  }, [])
+  const {
+    movieSize,
+    viewMode,
+    isWheelVisible,
+    watchedFilter,
+    wheelFriction,
+    setMovieSize,
+    setWatchedFilter,
+    setWheelFriction,
+  } = useUIStore()
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget)
@@ -96,8 +39,6 @@ export default function SettingsFab() {
   const handleMovieSizeChange = (_event: Event, value: number | number[]) => {
     const size = Array.isArray(value) ? value[0] : value
     setMovieSize(size)
-    document.documentElement.style.setProperty('--item-size', `${size}rem`)
-    localStorage.setItem('movieSize', size.toString())
   }
 
   const handleHideWatchedChange = (
@@ -105,10 +46,6 @@ export default function SettingsFab() {
   ) => {
     const newFilter = event.target.checked ? 'hideWatched' : 'all'
     setWatchedFilter(newFilter)
-    localStorage.setItem('watchedFilter', newFilter)
-    window.dispatchEvent(
-      new CustomEvent('watchedFilterChange', { detail: newFilter })
-    )
   }
 
   const handleOnlyWatchedChange = (
@@ -116,10 +53,6 @@ export default function SettingsFab() {
   ) => {
     const newFilter = event.target.checked ? 'onlyWatched' : 'all'
     setWatchedFilter(newFilter)
-    localStorage.setItem('watchedFilter', newFilter)
-    window.dispatchEvent(
-      new CustomEvent('watchedFilterChange', { detail: newFilter })
-    )
   }
 
   const handleWheelFrictionChange = (
@@ -128,7 +61,7 @@ export default function SettingsFab() {
   ) => {
     const friction = Array.isArray(value) ? value[0] : value
     setWheelFriction(friction)
-    localStorage.setItem('wheelFriction', (-friction).toString())
+    // Dispatch event for wheel component (still needs this for the wheel library)
     window.dispatchEvent(
       new CustomEvent('wheelFrictionChange', { detail: -friction })
     )

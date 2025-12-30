@@ -14,12 +14,10 @@ import RightSideMenu from '@/components/layout/right-side-menu'
 import ViewNavigation from '@/components/layout/bottom-navigation'
 import MovieListSkeleton from '@/components/movie/movie-list-skeleton'
 import {
-  getLocalMovies,
-  localMovieToMovie,
-  clearLocalMovies,
+  useMovieStore,
+  useSnackbarStore,
   hasLocalMoviesToSync,
-} from '@/lib/local-storage'
-import { useSnackbar } from '@/contexts/SnackbarContext'
+} from '@/lib/stores'
 import type { Movie } from '@/lib/firebase/firestore'
 
 interface HomePageContentProps {
@@ -32,16 +30,14 @@ export default function HomePageContent({
   userId,
 }: HomePageContentProps) {
   const router = useRouter()
-  const { showSnackbar } = useSnackbar()
-  const [localMovies, setLocalMovies] = useState<Movie[]>([])
+  const showSnackbar = useSnackbarStore((state) => state.showSnackbar)
+  const { localMovies, getMoviesAsMovieType, clearMovies } = useMovieStore()
   const [isLoading, setIsLoading] = useState(!userId)
   const hasSyncedRef = useRef(false)
 
-  // Load local movies for anonymous users
+  // Set loading to false once component mounts for anonymous users
   useEffect(() => {
     if (!userId) {
-      const movies = getLocalMovies()
-      setLocalMovies(movies.map((m) => localMovieToMovie(m)))
       setIsLoading(false)
     }
   }, [userId])
@@ -54,7 +50,7 @@ export default function HomePageContent({
       }
 
       hasSyncedRef.current = true
-      const localData = getLocalMovies()
+      const localData = localMovies
 
       if (localData.length === 0) {
         return
@@ -71,8 +67,7 @@ export default function HomePageContent({
 
         if (response.ok) {
           const result = await response.json()
-          clearLocalMovies()
-          setLocalMovies([])
+          clearMovies()
 
           if (result.synced > 0) {
             showSnackbar(
@@ -103,25 +98,13 @@ export default function HomePageContent({
     }
 
     syncLocalMovies()
-  }, [userId, router, showSnackbar])
+  }, [userId, router, showSnackbar, clearMovies])
 
-  // Listen for local movies updates
-  const handleLocalMoviesUpdated = useCallback(() => {
-    if (!userId) {
-      const movies = getLocalMovies()
-      setLocalMovies(movies.map((m) => localMovieToMovie(m)))
-    }
-  }, [userId])
-
-  useEffect(() => {
-    window.addEventListener('localMoviesUpdated', handleLocalMoviesUpdated)
-    return () => {
-      window.removeEventListener('localMoviesUpdated', handleLocalMoviesUpdated)
-    }
-  }, [handleLocalMoviesUpdated])
+  // Get movies as Movie type for anonymous users
+  const moviesFromStore = getMoviesAsMovieType()
 
   // Determine which movies to show
-  const movies = userId ? serverMovies : localMovies
+  const movies = userId ? serverMovies : moviesFromStore
 
   if (isLoading) {
     return <MovieListSkeleton count={12} />

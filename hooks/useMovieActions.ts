@@ -1,7 +1,7 @@
 /**
  * Movie Actions Hook - Centralized API operations
  * Provides consistent error handling and loading states
- * Supports both authenticated users (API) and anonymous users (localStorage)
+ * Supports both authenticated users (API) and anonymous users (Zustand store)
  */
 
 'use client'
@@ -21,7 +21,6 @@ export function useMovieActions(options: UseMovieActionsOptions = {}) {
     isAnonymous,
     toggleWatchedLocal,
     deleteMovieLocal,
-    refreshLocalMovies,
   } = useMovieContext()
   const [isLoading, setIsLoading] = useState(false)
 

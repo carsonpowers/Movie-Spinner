@@ -13,7 +13,7 @@ import TableChartIcon from '@mui/icons-material/TableChart'
 import Paper from '@mui/material/Paper'
 import Tooltip from '@mui/material/Tooltip'
 import { showWheel, hideWheel } from '@/components/movie/wheel'
-import { useSnackbar } from '@/contexts/SnackbarContext'
+import { useSnackbarStore, useUIStore } from '@/lib/stores'
 
 interface ViewNavigationProps {
   movieCount: number
@@ -23,7 +23,17 @@ const ViewNavigation = ({ movieCount }: ViewNavigationProps) => {
   const [value, setValue] = useState(1) // 0: wheel, 1: grid, 2: table
   const [isNear, setIsNear] = useState(false)
   const [isTouchDevice, setIsTouchDevice] = useState(false)
-  const { showSnackbar } = useSnackbar()
+  const showSnackbar = useSnackbarStore((state) => state.showSnackbar)
+  const { viewMode, setViewMode, setIsWheelVisible } = useUIStore()
+
+  // Sync value state with viewMode from store
+  useEffect(() => {
+    if (viewMode === 'table') {
+      setValue(2)
+    } else {
+      setValue(1)
+    }
+  }, [viewMode])
 
   useEffect(() => {
     // Detect if device is touch-enabled (mobile/tablet)
@@ -35,39 +45,6 @@ const ViewNavigation = ({ movieCount }: ViewNavigationProps) => {
       )
     }
     checkTouchDevice()
-
-    // Load saved view preference
-    const savedView = localStorage.getItem('movieView')
-    if (savedView === 'table') {
-      setValue(2)
-      window.dispatchEvent(new CustomEvent('viewChange', { detail: 'table' }))
-    }
-
-    // Listen for view mode changes from UI component to keep button in sync
-    const handleViewModeSync = (event: CustomEvent) => {
-      setValue(event.detail === 'table' ? 2 : 1)
-    }
-
-    window.addEventListener('viewModeSync', handleViewModeSync as EventListener)
-
-    // Dispatch initial wheel visibility state
-    window.dispatchEvent(
-      new CustomEvent('wheelVisibilityChange', {
-        detail:
-          savedView === 'table'
-            ? 'table'
-            : savedView === 'grid'
-            ? 'grid'
-            : 'wheel',
-      })
-    )
-
-    return () => {
-      window.removeEventListener(
-        'viewModeSync',
-        handleViewModeSync as EventListener
-      )
-    }
   }, [])
 
   const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
@@ -82,33 +59,26 @@ const ViewNavigation = ({ movieCount }: ViewNavigationProps) => {
       // Toggle to list view
       setValue(1)
       hideWheel()
-      const viewMode = 'grid'
-      localStorage.setItem('movieView', viewMode)
-      window.dispatchEvent(new CustomEvent('viewChange', { detail: viewMode }))
-      window.dispatchEvent(
-        new CustomEvent('wheelVisibilityChange', { detail: viewMode })
-      )
+      setViewMode('grid')
+      setIsWheelVisible(false)
       return
     }
 
     // Update view mode based on button selection
     if (newValue === 1 || newValue === 2) {
-      const viewMode = newValue === 2 ? 'table' : 'grid'
-      localStorage.setItem('movieView', viewMode)
-      window.dispatchEvent(new CustomEvent('viewChange', { detail: viewMode }))
-      window.dispatchEvent(
-        new CustomEvent('wheelVisibilityChange', { detail: viewMode })
-      )
+      const newViewMode = newValue === 2 ? 'table' : 'grid'
+      setViewMode(newViewMode)
+      setIsWheelVisible(false)
     }
 
     setValue(newValue)
 
     if (newValue === 0) {
       showWheel()
-      window.dispatchEvent(
-        new CustomEvent('wheelVisibilityChange', { detail: 'wheel' })
-      )
-    } else hideWheel()
+      setIsWheelVisible(true)
+    } else {
+      hideWheel()
+    }
   }
 
   return (
