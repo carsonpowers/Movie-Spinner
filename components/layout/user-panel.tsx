@@ -10,6 +10,7 @@ import { Menu, MenuItem, MenuSeparator, MenuLabel } from '@/components/ui/menu'
 import { Button } from '@/components/ui/base-button'
 import { useState } from 'react'
 import LogoutIcon from '@mui/icons-material/Logout'
+import Tooltip from '@mui/material/Tooltip'
 
 interface UserPanelProps {
   user?: {
@@ -36,23 +37,32 @@ export default function UserPanel({ user }: UserPanelProps) {
     return (
       <div className='fixed top-4 left-4 z-[100000]'>
         <form action={handleSignIn}>
-          <Button
-            type='submit'
-            variant='default'
-            sx={{
-              backgroundColor: '#111827',
-              backdropFilter: 'blur(10px)',
-              border: 'solid 1px rgba(255, 255, 255, 0.1)',
-              color: 'white !important',
-              '&:hover': {
-                backgroundColor: '#1f2937',
-                border: 'solid 1px rgba(255, 255, 255, 0.3)',
-              },
-            }}
+          <Tooltip
+            title='Sign in to sync your movies across devices'
+            arrow
+            placement='right'
           >
-            Sign In
-          </Button>
+            <Button
+              type='submit'
+              variant='default'
+              sx={{
+                backgroundColor: '#111827',
+                backdropFilter: 'blur(10px)',
+                border: 'solid 1px rgba(255, 255, 255, 0.1)',
+                color: 'white !important',
+                '&:hover': {
+                  backgroundColor: '#1f2937',
+                  border: 'solid 1px rgba(255, 255, 255, 0.3)',
+                },
+              }}
+            >
+              Sign In
+            </Button>
+          </Tooltip>
         </form>
+        <p className='text-xs text-gray-400 mt-2 max-w-[150px]'>
+          Guest mode — data saved locally
+        </p>
       </div>
     )
   }

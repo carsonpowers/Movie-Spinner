@@ -364,7 +364,7 @@ export default function UI({
   const { showSnackbar } = useSnackbar()
 
   return (
-    <MovieProvider onSnackbar={showSnackbar}>
+    <MovieProvider onSnackbar={showSnackbar} userId={userId}>
       <UIContent movies={movies} userId={userId} />
     </MovieProvider>
   )

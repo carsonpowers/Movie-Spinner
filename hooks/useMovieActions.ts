@@ -1,6 +1,7 @@
 /**
  * Movie Actions Hook - Centralized API operations
  * Provides consistent error handling and loading states
+ * Supports both authenticated users (API) and anonymous users (localStorage)
  */
 
 'use client'
@@ -14,13 +15,31 @@ interface UseMovieActionsOptions {
 }
 
 export function useMovieActions(options: UseMovieActionsOptions = {}) {
-  const { refresh, showSnackbar } = useMovieContext()
+  const { 
+    refresh, 
+    showSnackbar, 
+    isAnonymous,
+    toggleWatchedLocal,
+    deleteMovieLocal,
+    refreshLocalMovies,
+  } = useMovieContext()
   const [isLoading, setIsLoading] = useState(false)
 
   const toggleWatched = useCallback(
     async (movieId: string) => {
       setIsLoading(true)
       try {
+        if (isAnonymous) {
+          // Handle locally for anonymous users
+          const result = toggleWatchedLocal(movieId)
+          if (result === null) {
+            throw new Error('Movie not found')
+          }
+          options.onSuccess?.()
+          return true
+        }
+
+        // Authenticated user - use API
         const response = await fetch('/api/toggleWatched', {
           method: 'POST',
           headers: {
@@ -45,13 +64,28 @@ export function useMovieActions(options: UseMovieActionsOptions = {}) {
         setIsLoading(false)
       }
     },
-    [refresh, showSnackbar, options]
+    [refresh, showSnackbar, options, isAnonymous, toggleWatchedLocal]
   )
 
   const deleteMovie = useCallback(
     async (movieId: string, movieTitle?: string) => {
       setIsLoading(true)
       try {
+        if (isAnonymous) {
+          // Handle locally for anonymous users
+          const result = deleteMovieLocal(movieId)
+          if (!result) {
+            throw new Error('Movie not found')
+          }
+          showSnackbar(
+            `${movieTitle || 'Movie'} removed successfully`,
+            'success'
+          )
+          options.onSuccess?.()
+          return true
+        }
+
+        // Authenticated user - use API
         const response = await fetch(`/api/deleteMovie?id=${movieId}`, {
           method: 'DELETE',
         })
@@ -79,7 +113,7 @@ export function useMovieActions(options: UseMovieActionsOptions = {}) {
         setIsLoading(false)
       }
     },
-    [refresh, showSnackbar, options]
+    [refresh, showSnackbar, options, isAnonymous, deleteMovieLocal]
   )
 
   return {

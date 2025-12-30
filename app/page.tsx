@@ -1,19 +1,17 @@
 /**
  * Home Page - Server Component
  * Fetches movies server-side for optimal performance
+ * Supports both authenticated users and anonymous users
  */
 
 import { Suspense } from 'react'
 import { auth } from '@/auth'
 import { getUserMovies } from '@/lib/firebase/firestore'
 import UserPanel from '@/components/layout/user-panel'
-import MovieList from '@/components/movie/movie-list'
-import Wheel from '@/components/movie/wheel'
-import RatingPopup from '@/components/movie/rating-popup'
-import ViewNavigation from '@/components/layout/bottom-navigation'
-import LoadingSpinner from '@/components/common/loading-spinner'
 import MovieListSkeleton from '@/components/movie/movie-list-skeleton'
-import RightSideMenu from '@/components/layout/right-side-menu'
+import RatingPopup from '@/components/movie/rating-popup'
+import LoadingSpinner from '@/components/common/loading-spinner'
+import HomePageContent from '@/components/home-page-content'
 
 // Enable dynamic rendering for auth
 export const dynamic = 'force-dynamic'
@@ -39,7 +37,7 @@ async function getMoviesForUser() {
 
 export default async function HomePage() {
   const session = await auth()
-  const movies = await getMoviesForUser()
+  const serverMovies = await getMoviesForUser()
 
   return (
     <main className='min-h-screen bg-gradient-to-b from-gray-900 to-black'>
@@ -47,13 +45,13 @@ export default async function HomePage() {
         <UserPanel user={session?.user} />
       </Suspense>
       <Suspense fallback={<MovieListSkeleton count={12} />}>
-        <MovieList movies={movies} userId={session?.user?.id} />
+        <HomePageContent
+          serverMovies={serverMovies}
+          userId={session?.user?.id}
+        />
       </Suspense>
       <Suspense fallback={null}>
-        <Wheel movies={movies} />
         <RatingPopup />
-        <RightSideMenu userId={session?.user?.id} movieCount={movies.length} />
-        <ViewNavigation movieCount={movies.length} />
       </Suspense>
     </main>
   )

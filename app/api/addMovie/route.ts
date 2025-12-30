@@ -1,6 +1,7 @@
 /**
  * Add Movie API Route
  * Uses Node.js runtime for firebase-admin compatibility
+ * Supports both authenticated users and data sync for newly registered users
  */
 // cSpell:ignore Firestore
 
@@ -16,9 +17,11 @@ export async function POST(request: NextRequest) {
     // Verify authentication
     const session = await auth()
     
+    // For anonymous users adding movies, we'll handle this client-side with localStorage
+    // This endpoint requires authentication for database operations
     if (!session?.user) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'Unauthorized - use localStorage for anonymous users' },
         { status: 401 }
       )
     }

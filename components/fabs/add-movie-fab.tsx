@@ -26,8 +26,7 @@ export default function AddMovieFab({
     setOpen(false)
   }
 
-  if (!userId) return null
-
+  // Allow both authenticated and anonymous users to add movies
   return (
     <>
       {movieCount === 0 && (

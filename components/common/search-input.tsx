@@ -10,6 +10,7 @@ import CircularProgress from '@mui/material/CircularProgress'
 import Paper from '@mui/material/Paper'
 import ClickAwayListener from '@mui/material/ClickAwayListener'
 import { useSnackbar } from '@/contexts/SnackbarContext'
+import { addLocalMovie } from '@/lib/local-storage'
 
 interface Movie {
   id?: string
@@ -65,8 +66,24 @@ const fetchMovieData = async ({
 const addMovie = async (
   movie: Movie,
   imdbId: string,
+  userId: string | undefined,
   onSuccess?: () => void
 ) => {
+  // For anonymous users, save to localStorage
+  if (!userId) {
+    addLocalMovie({
+      title: movie.title,
+      year: movie.year,
+      poster: movie.poster,
+      imdbId: imdbId,
+    })
+    onSuccess?.()
+    // Dispatch event to notify components
+    window.dispatchEvent(new CustomEvent('localMoviesUpdated'))
+    return
+  }
+
+  // For authenticated users, use the API
   try {
     const response = await fetch('/api/addMovie', {
       method: 'POST',
@@ -169,7 +186,7 @@ export default function UnifiedSearchInput({
     if (!value || mode !== 'add') return
 
     try {
-      await addMovie(value, value.imdbID || value.title, () => {
+      await addMovie(value, value.imdbID || value.title, userId, () => {
         showSnackbar(`"${value.title}" has been added!`, 'success')
         router.refresh()
         onClose()
