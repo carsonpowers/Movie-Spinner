@@ -35,35 +35,39 @@ export default function UserPanel({ user }: UserPanelProps) {
 
   if (!user) {
     return (
-      <div className='fixed top-4 left-4 z-[100000]'>
-        <form action={handleSignIn}>
-          <Tooltip
-            title='Sign in to sync your movies across devices'
-            arrow
-            placement='right'
-          >
-            <Button
-              type='submit'
-              variant='default'
-              sx={{
-                backgroundColor: '#111827',
-                backdropFilter: 'blur(10px)',
-                border: 'solid 1px rgba(255, 255, 255, 0.1)',
-                color: 'white !important',
-                '&:hover': {
-                  backgroundColor: '#1f2937',
-                  border: 'solid 1px rgba(255, 255, 255, 0.3)',
-                },
-              }}
+      <>
+        <div className='fixed top-4 left-4 z-[100000]'>
+          <form action={handleSignIn}>
+            <Tooltip
+              title='Sign in to sync your movies across devices'
+              arrow
+              placement='right'
             >
-              Sign In
-            </Button>
-          </Tooltip>
-        </form>
-        <p className='text-xs text-gray-400 mt-2 max-w-[150px]'>
-          Guest mode — data saved locally
-        </p>
-      </div>
+              <Button
+                type='submit'
+                variant='default'
+                sx={{
+                  backgroundColor: '#111827',
+                  backdropFilter: 'blur(10px)',
+                  border: 'solid 1px rgba(255, 255, 255, 0.1)',
+                  color: 'white !important',
+                  '&:hover': {
+                    backgroundColor: '#1f2937',
+                    border: 'solid 1px rgba(255, 255, 255, 0.3)',
+                  },
+                }}
+              >
+                Sign In
+              </Button>
+            </Tooltip>
+          </form>
+        </div>
+        <div className='fixed bottom-24 left-1/2 -translate-x-1/2 z-[100000] text-center'>
+          <p className='text-sm text-gray-400 bg-gray-900/80 backdrop-blur-sm px-4 py-2 rounded-full border border-gray-700'>
+            Guest mode — data saved locally
+          </p>
+        </div>
+      </>
     )
   }
 
